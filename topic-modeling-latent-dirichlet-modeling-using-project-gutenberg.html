@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Topic Modeling (Latent Dirichlet Modeling) using Project Gutenberg - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/topic-modeling-latent-dirichlet-modeling-using-project-gutenberg.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="For this topic modeling analysis, three works were analyzed: Pride and Prejudice by Jane Austen, The Fall of the House of Usher by Edgar Allan Poe and The War of the Worlds by H.G. Wells. Since each work has a distinct genre and explores specific themes, these three works …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Topic Modeling (Latent Dirichlet Modeling) using Project Gutenberg"/>
+        <meta property="og:url" content="/topic-modeling-latent-dirichlet-modeling-using-project-gutenberg.html"/>
+        <meta property="og:description" content="For this topic modeling analysis, three works were analyzed: Pride and Prejudice by Jane Austen, The Fall of the House of Usher by Edgar Allan Poe and The War of the Worlds by H.G. Wells. Since each work has a distinct genre and explores specific themes, these three works …"/>
+        <meta property="article:published_time" content="2018-03-18" />
+            <meta property="article:section" content="Text Analysis" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li >
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li >
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/topic-modeling-latent-dirichlet-modeling-using-project-gutenberg.html"
+                       rel="bookmark"
+                       title="Permalink to Topic Modeling (Latent Dirichlet Modeling) using Project Gutenberg">
+                        Topic Modeling (Latent Dirichlet Modeling) using Project Gutenberg
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-03-18T00:00:00-04:00"> Sun 18 March 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/text-analysis.html">Text Analysis</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p><br></p>
+<h5>For this topic modeling analysis, three works were analyzed: <em>Pride and Prejudice</em> by Jane Austen, <em>The Fall of the House of Usher</em> by Edgar Allan Poe and <em>The War of the Worlds</em> by H.G. Wells. Since each work has a distinct genre and explores specific themes, these three works were apt.</h5>
+<h5><em>Pride and Prejudice</em> charts character development of the Bennet daughters, especially Elizabeth Bennet, exploring themes like love, marriage, social structures, wealth and class. <em>The Fall of the House of Usher</em> sketches a Gothic, haunted house, exploring themes like isolation, fear and the supernatural. <em>The War of the Worlds</em> is a science fiction tale of humans' interaction and conflicts with extraterrestrial life, exploring themes like warfare, conflict, technology, fear and otherness.</h5>
+<p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>gutenbergr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>tidytext<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>topicmodels<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Retrieve text from Project Gutenberg</h3>
+<div class="highlight"><pre><span></span>gutenberg_works<span class="p">(</span>title <span class="o">==</span> <span class="s">&quot;Pride and Prejudice&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 1 x 8
+##   gutenberg_id title   author gutenberg_autho… language gutenberg_bookshe…
+##          &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;             
+## 1         1342 Pride … Auste…               68 en       Best Books Ever L…
+## # ... with 2 more variables: rights &lt;chr&gt;, has_text &lt;lgl&gt;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>gutenberg_works<span class="p">(</span>title <span class="o">==</span> <span class="s">&quot;The Fall of the House of Usher&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 1 x 8
+##   gutenberg_id title    author  gutenberg_autho… language gutenberg_books…
+##          &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;              &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;           
+## 1          932 The Fal… Poe, E…              481 en       Movie Books     
+## # ... with 2 more variables: rights &lt;chr&gt;, has_text &lt;lgl&gt;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>gutenberg_works<span class="p">(</span>title <span class="o">==</span> <span class="s">&quot;The War of the Worlds&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 1 x 8
+##   gutenberg_id title   author   gutenberg_autho… language gutenberg_books…
+##          &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;               &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;           
+## 1           36 The Wa… Wells, …               30 en       Movie Books/Sci…
+## # ... with 2 more variables: rights &lt;chr&gt;, has_text &lt;lgl&gt;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>literature <span class="o">&lt;-</span> gutenberg_download<span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="m">1342</span><span class="p">,</span> <span class="m">932</span><span class="p">,</span> <span class="m">36</span><span class="p">),</span> meta_fields <span class="o">=</span> <span class="s">&quot;title&quot;</span><span class="p">)</span> <span class="c1"># passing gutenberg_id</span>
+<span class="kp">head</span><span class="p">(</span>literature<span class="p">,</span> <span class="m">15</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 15 x 3
+##    gutenberg_id text                                       title          
+##           &lt;int&gt; &lt;chr&gt;                                      &lt;chr&gt;          
+##  1           36 The War of the Worlds                      The War of the…
+##  2           36 &quot;&quot;                                         The War of the…
+##  3           36 by H. G. Wells [1898]                      The War of the…
+##  4           36 &quot;&quot;                                         The War of the…
+##  5           36 &quot;&quot;                                         The War of the…
+##  6           36 &quot;     But who shall dwell in these worlds… The War of the…
+##  7           36 &quot;     inhabited? .  .  .  Are we or they … The War of the…
+##  8           36 &quot;     World? .  .  .  And how are all thi… The War of the…
+##  9           36 &quot;          KEPLER (quoted in The Anatomy … The War of the…
+## 10           36 &quot;&quot;                                         The War of the…
+## 11           36 &quot;&quot;                                         The War of the…
+## 12           36 &quot;&quot;                                         The War of the…
+## 13           36 BOOK ONE                                   The War of the…
+## 14           36 &quot;&quot;                                         The War of the…
+## 15           36 THE COMING OF THE MARTIANS                 The War of the…
+</pre></div>
+
+
+<p><br></p>
+<h3>Tokenize text</h3>
+<div class="highlight"><pre><span></span>tokenize <span class="o">&lt;-</span> literature <span class="o">%&gt;%</span> unnest_tokens<span class="p">(</span>word<span class="p">,</span> text<span class="p">)</span>
+<span class="kp">head</span><span class="p">(</span>tokenize<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 6 x 3
+##   gutenberg_id title                 word  
+##          &lt;int&gt; &lt;chr&gt;                 &lt;chr&gt;
+## 1           36 The War of the Worlds the   
+## 2           36 The War of the Worlds war   
+## 3           36 The War of the Worlds of    
+## 4           36 The War of the Worlds the   
+## 5           36 The War of the Worlds worlds
+## 6           36 The War of the Worlds by
+</pre></div>
+
+
+<p><br></p>
+<h3>Remove stop words</h3>
+<div class="highlight"><pre><span></span>tokenize_stop <span class="o">&lt;-</span> tokenize <span class="o">%&gt;%</span>
+  anti_join<span class="p">(</span>stop_words<span class="p">,</span> by <span class="o">=</span> <span class="s">&quot;word&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  dplyr<span class="o">::</span>count<span class="p">(</span>title<span class="p">,</span> word<span class="p">,</span> sort <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Cast text to Document Term Matrix (DTM) and applying Latent Dirichlet Allocation Model (LDA)</h3>
+<div class="highlight"><pre><span></span>dtm <span class="o">&lt;-</span> tokenize_stop <span class="o">%&gt;%</span> cast_dtm<span class="p">(</span>title<span class="p">,</span> word<span class="p">,</span> n<span class="p">)</span> <span class="c1"># casting tokenized text in Document Term Matrix (DTM)</span>
+LDM_model <span class="o">&lt;-</span> LDA<span class="p">(</span>dtm<span class="p">,</span> k <span class="o">=</span> <span class="m">3</span><span class="p">,</span> control <span class="o">=</span> <span class="kt">list</span><span class="p">(</span>seed <span class="o">=</span> <span class="m">1234</span><span class="p">))</span> <span class="c1"># selecting k = 3 for three texts</span>
+result <span class="o">&lt;-</span> tidy<span class="p">(</span>LDM_model<span class="p">,</span> <span class="kt">matrix</span> <span class="o">=</span> <span class="s">&quot;beta&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Retrieve top 20 words from each topic</h3>
+<div class="highlight"><pre><span></span>top_20_words <span class="o">&lt;-</span> result <span class="o">%&gt;%</span>
+  group_by<span class="p">(</span>topic<span class="p">)</span> <span class="o">%&gt;%</span>
+  top_n<span class="p">(</span><span class="m">20</span><span class="p">,</span> <span class="kp">beta</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  ungroup<span class="p">()</span> <span class="o">%&gt;%</span>
+  arrange<span class="p">(</span>topic<span class="p">,</span> <span class="o">-</span><span class="kp">beta</span><span class="p">)</span>  <span class="o">%&gt;%</span>
+  mutate<span class="p">(</span>term <span class="o">=</span> reorder<span class="p">(</span>term<span class="p">,</span> <span class="kp">beta</span><span class="p">))</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Plot top 20 words</h3>
+<div class="highlight"><pre><span></span>top_20_words<span class="o">$</span>topic <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>top_20_words<span class="o">$</span>topic<span class="p">)</span>
+<span class="kp">levels</span><span class="p">(</span>top_20_words<span class="o">$</span>topic<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>top_20_words<span class="o">$</span>topic <span class="o">&lt;-</span> plyr<span class="o">::</span>revalue<span class="p">(</span>top_20_words<span class="o">$</span>topic<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;1&quot;</span> <span class="o">=</span> <span class="s">&quot;1 ~ The War of the Worlds&quot;</span><span class="p">,</span>
+                                              <span class="s">&quot;2&quot;</span> <span class="o">=</span> <span class="s">&quot;2 ~ Fall of the House of Usher&quot;</span><span class="p">,</span>
+                                              <span class="s">&quot;3&quot;</span> <span class="o">=</span> <span class="s">&quot;3 ~ Pride and Prejudice&quot;</span><span class="p">))</span>
+
+ggplot<span class="p">(</span>top_20_words<span class="p">,</span> aes<span class="p">(</span>term<span class="p">,</span> <span class="kp">beta</span><span class="p">,</span> fill <span class="o">=</span> topic<span class="p">))</span> <span class="o">+</span>
+  geom_col<span class="p">(</span>show.legend <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span> <span class="o">+</span>
+  facet_wrap<span class="p">(</span><span class="o">~</span> topic<span class="p">,</span> scales <span class="o">=</span> <span class="s">&quot;free&quot;</span><span class="p">)</span> <span class="o">+</span> theme_bw<span class="p">()</span> <span class="o">+</span>
+  coord_flip<span class="p">()</span> <span class="o">+</span> scale_fill_brewer<span class="p">(</span>palette <span class="o">=</span> <span class="s">&quot;Set1&quot;</span><span class="p">)</span> <span class="o">+</span> theme<span class="p">(</span>text <span class="o">=</span> element_text<span class="p">(</span>size <span class="o">=</span> <span class="m">18</span><span class="p">))</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;image&quot;" src="/figures/TopicModeling/unnamed-chunk-7-1.png">
+</center></p>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 6 of the Text Analysis series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/convert-string-to-upper-and-lower-case.html">Convert String to Upper and Lower Case</a></li>
+           <li><a href="/split-by-characterseparator.html">Split by Character/Separator</a></li>
+           <li><a href="/substitute-a-pattern-in-string.html">Substitute a Pattern in String</a></li>
+           <li><a href="/tokenize-string.html">Tokenize String</a></li>
+           <li><a href="/bigram-analysis.html">Bigram Analysis</a></li>
+       </ul>
+       <h5>Next articles</h5>
+       <ul>
+           <li><a href="/word-cloud.html">Word Cloud</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Data Wrangling - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+    <meta name="author" content="Azka Javaid" />
+    <meta name="keywords" content="Data Wrangling" />
+
+    <!-- Open Graph tags -->
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="website"/>
+        <meta property="og:title" content="Data Science with R"/>
+        <meta property="og:url" content=""/>
+        <meta property="og:description" content="Data Science with R"/>
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li >
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li >
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li >
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+            <article>
+                <h2><a href="/apply-a-function-to-all-variables.html">Apply a function to all variables</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Find mean of all numeric columns of a Data Frame</h3>
+<div class="highlight"><pre><span></span><span class="kp">lapply</span><span class="p">(</span>mtcars<span class="p">,</span> <span class="kp">class</span><span class="p">)</span> <span class="c1"># find class of all predictors</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## $mpg
+## [1] &quot;numeric&quot;
+## 
+## $cyl
+## [1] &quot;character&quot;
+## 
+## $disp
+## [1] &quot;numeric&quot;
+## 
+## $hp
+## [1] &quot;numeric&quot;
+## 
+## $drat
+## [1] &quot;numeric&quot;
+## 
+## $wt
+## [1] &quot;numeric&quot;
+## 
+## $qsec
+## [1] &quot;numeric&quot;
+## 
+## $vs
+## [1] &quot;numeric&quot;
+## 
+## $am
+## [1] &quot;character&quot;
+## 
+## $gear
+## [1] &quot;character&quot;
+## 
+## $carb
+## [1 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/apply-a-function-to-all-variables.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/create-and-parse-lists-of-lists.html">Create and Parse Lists of Lists</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Creating a lists of lists</h3>
+<div class="highlight"><pre><span></span>list1 <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span>attr <span class="o">=</span> <span class="s">&quot;Fruits&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;mango&quot;</span><span class="p">,</span> <span class="s">&quot;apple&quot;</span><span class="p">,</span> <span class="s">&quot;strawberries&quot;</span><span class="p">))</span>
+list2 <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span>attr <span class="o">=</span> <span class="s">&quot;Vegetables&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;tomato&quot;</span><span class="p">,</span> <span class="s">&quot;potato&quot;</span><span class="p">))</span>
+list3 <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span>attr <span class="o">=</span> <span class="s">&quot;Tidyverse&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;dplyr&quot;</span><span class="p">,</span> <span class="s">&quot;plyr&quot;</span><span class="p">,</span> <span class="s">&quot;ggplot2&quot;</span><span class="p">))</span>
+list4 <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span>attr <span class="o">=</span> <span class="s">&quot;Workflow&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Data Cleaning&quot;</span><span class="p">,</span> <span class="s">&quot;Modeling&quot;</span><span class="p">,</span> <span class="s">&quot;Visualization&quot;</span><span class="p">,</span> <span class="s">&quot;Communication&quot;</span><span class="p">))</span>
+list_val <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span>list1<span class="p">,</span> list2<span class="p">,</span> list3<span class="p">,</span> list4<span class="p">)</span>
+list_val
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [[1 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/create-and-parse-lists-of-lists.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/appending-columns-to-a-data-frame.html">Appending Columns to a Data Frame</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Appending columns using <em>cbind</em></h3>
+<div class="highlight"><pre><span></span><span class="c1"># Random day, month and year predictors, indicating time of CO2 measurements</span>
+day <span class="o">&lt;-</span> <span class="kp">sample</span><span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="m">30</span><span class="p">),</span> <span class="kp">nrow</span><span class="p">(</span>CO2<span class="p">),</span> <span class="kc">TRUE</span><span class="p">)</span>
+month <span class="o">&lt;-</span> <span class="kp">sample</span><span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="m">12</span><span class="p">),</span> <span class="kp">nrow</span><span class="p">(</span>CO2<span class="p">),</span> <span class="kc">TRUE</span><span class="p">)</span>
+year <span class="o">&lt;-</span> <span class="kp">sample</span><span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="m">2013</span><span class="p">,</span> <span class="m">2014</span><span class="p">,</span> <span class="m">2015</span><span class="p">),</span> <span class="kp">nrow</span><span class="p">(</span>CO2<span class="p">),</span> <span class="kc">TRUE</span><span class="p">)</span>
+CO2_time <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>CO2<span class="p">,</span> day<span class="p">,</span> month<span class="p">,</span> year<span class="p">)</span> <span class="c1"># binding the time predictors …</span></pre></div>
+                    <a class="btn btn-default btn-xs" href="/appending-columns-to-a-data-frame.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/change-reference-level-of-a-categorical-predictor.html">Change Reference Level of a Categorical Predictor</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>plyr<span class="p">)</span> <span class="c1"># loading plyr for mutate function</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Check current reference level of <em>Species</em></h3>
+<div class="highlight"><pre><span></span><span class="kp">levels</span><span class="p">(</span>iris<span class="o">$</span>Species<span class="p">)</span> <span class="c1"># current reference level is setosa</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] &quot;setosa&quot;     &quot;versicolor&quot; &quot;virginica&quot;
+</pre></div>
+
+
+<p><br></p>
+<h3>Change reference level from <em>setosa</em> to <em>versicolor</em></h3>
+<div class="highlight"><pre><span></span>iris<span class="o">$</span>Species <span class="o">&lt;-</span> relevel<span class="p">(</span>iris<span class="o">$</span>Species<span class="p">,</span> ref <span class="o">=</span> <span class="s">&quot;versicolor&quot;</span><span class="p">)</span>
+<span class="kp">levels</span><span class="p">(</span>iris<span class="o">$</span>Species<span class="p">)</span> <span class="c1"># reference level changed to versicolor</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/change-reference-level-of-a-categorical-predictor.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/compare-two-datasets-find-commondifferent-observations.html">Compare Two Datasets (Find Common/Different Observations)</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Creating sample datasets</h3>
+<div class="highlight"><pre><span></span>LatLong <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;40.841885, -73.856621&quot;</span><span class="p">,</span>
+             <span class="s">&quot;40.675026, -73.944855&quot;</span><span class="p">,</span> 
+             <span class="s">&quot;40.726253, -73.806710&quot;</span><span class="p">,</span>
+             <span class="s">&quot;40.725375, -73.789845&quot;</span><span class="p">,</span> 
+             <span class="s">&quot;40.845456, -73.876555&quot;</span><span class="p">)</span>
+Location <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Bronx&quot;</span><span class="p">,</span> <span class="s">&quot;Brooklyn&quot;</span><span class="p">,</span> 
+              <span class="s">&quot;Manhattan&quot;</span><span class="p">,</span> <span class="s">&quot;Queens&quot;</span><span class="p">,</span> <span class="s">&quot;Staten Island&quot;</span><span class="p">)</span>
+geoData <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>LatLong<span class="p">,</span> Location<span class="p">)</span>
+geoData
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##                 LatLong      Location
+## 1 40.841885, -73.856621 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/compare-two-datasets-find-commondifferent-observations.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/converting-rownames-to-column.html">Converting Rownames to Column</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>data.table<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>jsonlite<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Generating sample data</h3>
+<div class="highlight"><pre><span></span>url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://rdocumentation.org/api/packages/&quot;</span><span class="p">,</span> <span class="s">&quot;dplyr&quot;</span><span class="p">,</span> <span class="s">&quot;/versions/&quot;</span><span class="p">,</span> <span class="s">&quot;0.7.3&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+dat <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> <span class="kp">url</span><span class="p">)</span>
+metrics <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat<span class="o">$</span>package_name<span class="p">,</span> dat<span class="o">$</span><span class="kp">version</span><span class="p">,</span> dat<span class="o">$</span>title<span class="p">,</span> dat<span class="o">$</span>description<span class="p">,</span> 
+                  dat<span class="o">$</span>release_date<span class="p">,</span> dat<span class="o">$</span><span class="kp">license</span><span class="p">,</span> dat<span class="o">$</span>maintainer<span class="o">$</span>name<span class="p">,</span> dat<span class="o">$</span>maintainer<span class="o">$</span>email<span class="p">)</span>
+<span class="kp">colnames</span><span class="p">(</span>metrics …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/converting-rownames-to-column.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/count-number-of-elements-in-string-list-and-data-frame.html">Count Number of Elements in String, List and Data Frame</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Count characters in string</h3>
+<div class="highlight"><pre><span></span><span class="kp">nchar</span><span class="p">(</span><span class="s">&quot;pomegranate&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 11
+</pre></div>
+
+
+<p><br></p>
+<h3>Count elements in a list</h3>
+<div class="highlight"><pre><span></span>fruits <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;mango&quot;</span><span class="p">,</span> <span class="s">&quot;pomegranate&quot;</span><span class="p">,</span> <span class="s">&quot;berries&quot;</span><span class="p">,</span> <span class="s">&quot;orange&quot;</span><span class="p">)</span>
+<span class="kp">length</span><span class="p">(</span>fruits<span class="p">)</span> <span class="c1"># number of elements in list</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 4
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kp">nchar</span><span class="p">(</span>fruits<span class="p">)</span> <span class="c1"># count of characters in string </span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1]  5 11  7  6
+</pre></div>
+
+
+<p><br></p>
+<h3>Count observations in data frame, <em>iris</em></h3>
+<div class="highlight"><pre><span></span><span class="kp">nrow</span><span class="p">(</span>iris<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 150 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/count-number-of-elements-in-string-list-and-data-frame.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/create-new-predictors.html">Create New Predictors</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>plyr<span class="p">)</span> <span class="c1"># loading plyr for mutate function</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Creating new variables using mutate</h3>
+<h3>Calculating Body Mass Index (BMI) from <em>height</em> and <em>weight</em> from women dataset</h3>
+<div class="highlight"><pre><span></span><span class="c1"># converting weight from pounds to kilogram</span>
+women_BMI <span class="o">&lt;-</span> mutate<span class="p">(</span>women<span class="p">,</span> weight_kg <span class="o">=</span> weight <span class="o">/</span> <span class="m">2.2</span><span class="p">)</span> <span class="c1"># weight_kg = weight in kilograms</span>
+
+<span class="c1"># converting height from inches to meters </span>
+women_BMI …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/create-new-predictors.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/create-new-variables-using-mutate-and-ifelse.html">Create new variables using mutate and ifelse</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Use mutate and ifelse syntax to create a new variable</h3>
+<div class="highlight"><pre><span></span>iris_mutate <span class="o">&lt;-</span> mutate<span class="p">(</span>iris<span class="p">,</span> SepalLengthCat <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>Sepal.Length <span class="o">&gt;</span> <span class="kp">mean</span><span class="p">(</span>Sepal.Length<span class="p">),</span> <span class="s">&quot;High&quot;</span><span class="p">,</span> 
+                                    <span class="kp">ifelse</span><span class="p">(</span>Sepal.Length <span class="o">&lt;</span> <span class="kp">mean</span><span class="p">(</span>Sepal.Length<span class="p">),</span> <span class="s">&quot;Low&quot;</span><span class="p">,</span> <span class="s">&quot;Equal&quot;</span><span class="p">)))</span> 
+<span class="kp">head</span><span class="p">(</span>iris_mutate<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species SepalLengthCat
+## 1          5.1         3.5 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/create-new-variables-using-mutate-and-ifelse.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/create-sample-observations.html">Create Sample Observations</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Create sample boolean vector of length 10</h3>
+<div class="highlight"><pre><span></span><span class="kp">sample</span><span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="s">&quot;Yes&quot;</span><span class="p">,</span> <span class="s">&quot;No&quot;</span><span class="p">),</span> <span class="m">10</span><span class="p">,</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="c1">#sample with replacement </span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##  [1] &quot;No&quot;  &quot;No&quot;  &quot;Yes&quot; &quot;Yes&quot; &quot;No&quot;  &quot;Yes&quot; &quot;No&quot;  &quot;No&quot;  &quot;Yes&quot; &quot;No&quot;
+</pre></div>
+
+
+<p><br></p>
+<h3>Create sample numeric vector of length 15</h3>
+<div class="highlight"><pre><span></span><span class="kp">sample</span><span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="m">15</span><span class="p">),</span> <span class="m">15</span><span class="p">,</span> <span class="kc">FALSE</span><span class="p">)</span> <span class="c1">#sample without replacement </span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##  [1] 15  2  1  7 11  3 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/create-sample-observations.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/drop-row-and-column-by-index-and-value.html">Drop Row and Column by Index and Value</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Drop row by index from <em>iris</em></h3>
+<div class="highlight"><pre><span></span>iris_row_index <span class="o">&lt;-</span> iris<span class="p">[</span><span class="m">-2</span><span class="p">,</span> <span class="p">]</span>
+<span class="kp">head</span><span class="p">(</span>iris<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/drop-row-and-column-by-index-and-value.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/dropping-levels-of-a-factor.html">Dropping Levels of a Factor</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>plyr<span class="p">)</span> <span class="c1"># loading plyr for mutate function</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Subset only <em>setosa</em> species from <em>Iris</em></h3>
+<div class="highlight"><pre><span></span>iris_setosa <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>iris<span class="p">,</span> Species <span class="o">==</span> <span class="s">&quot;setosa&quot;</span><span class="p">)</span>
+<span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Unique species in iris_setosa:&quot;</span><span class="p">,</span> <span class="kp">unique</span><span class="p">(</span>iris_setosa<span class="o">$</span>Species<span class="p">),</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] &quot;Unique species in iris_setosa: setosa&quot;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kp">levels</span><span class="p">(</span>iris_setosa<span class="o">$</span>Species<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] &quot;versicolor&quot; &quot;setosa&quot;     &quot;virginica&quot;
+</pre></div>
+
+
+<p><br></p>
+<h3>Levels shows all species even though filtered dataset …</h3>
+                    <a class="btn btn-default btn-xs" href="/dropping-levels-of-a-factor.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/impute-categorical-missing-values-using-mode.html">Impute Categorical Missing Values using Mode</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Create data frame with missing categorical features</h3>
+<div class="highlight"><pre><span></span><span class="kp">head</span><span class="p">(</span>iris<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/impute-categorical-missing-values-using-mode.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/impute-numeric-missing-values-using-mean.html">Impute Numeric Missing Values using Mean</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Check data frame for missing values</h3>
+<div class="highlight"><pre><span></span><span class="kp">head</span><span class="p">(</span>airquality<span class="p">)</span> <span class="c1"># airquality dataset contains missing values </span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>##   Ozone Solar.R Wind Temp Month Day
+## 1    41     190  7.4   67     5   1
+## 2    36     118  8.0   72     5   2
+## 3    12     149 12.6   74     5   3
+## 4    18     313 11.5   62 …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/impute-numeric-missing-values-using-mean.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+            <article>
+                <h2><a href="/iterate-over-elements-using-for-loop.html">Iterate over elements using for-loop</a></h2>
+                <div class="summary"><p><br></p>
+<h3>Loop over list of integers</h3>
+<div class="highlight"><pre><span></span><span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">5</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kp">print</span><span class="p">(</span>i<span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+</pre></div>
+
+
+<p><br></p>
+<h3>Iterate over column names to display first observation from every column</h3>
+<div class="highlight"><pre><span></span><span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="kp">names</span><span class="p">(</span>mtcars<span class="p">))</span>
+<span class="p">{</span>
+  <span class="kp">print</span><span class="p">(</span><span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Value for &quot;</span><span class="p">,</span> i<span class="p">,</span> <span class="s">&quot;: &quot;</span><span class="p">,</span> mtcars<span class="p">[</span><span class="m">1</span><span class="p">,</span> i<span class="p">],</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] &quot;Value for …</pre></div>
+                    <a class="btn btn-default btn-xs" href="/iterate-over-elements-using-for-loop.html">more ...</a>
+                </div>
+            </article>
+            <hr/>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

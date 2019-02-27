@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Logistic Regression - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/logistic-regression.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="Import packages library(stats) Split data in training and test sets set.seed(90) n &lt;- nrow(CO2) index = sample(1:n, size = round(0.75*n), replace = FALSE) train = CO2[index, ] test = CO2[-index, ] Logistic model predicting Treatment from CO2 train dataset class(CO2$Treatment) ## [1] &#34;factor&#34; log_mod_train &lt;- glm(Treatment …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Logistic Regression"/>
+        <meta property="og:url" content="/logistic-regression.html"/>
+        <meta property="og:description" content="Import packages library(stats) Split data in training and test sets set.seed(90) n &lt;- nrow(CO2) index = sample(1:n, size = round(0.75*n), replace = FALSE) train = CO2[index, ] test = CO2[-index, ] Logistic model predicting Treatment from CO2 train dataset class(CO2$Treatment) ## [1] &#34;factor&#34; log_mod_train &lt;- glm(Treatment …"/>
+        <meta property="article:published_time" content="2018-02-24" />
+            <meta property="article:section" content="Machine Learning" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li >
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li >
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/logistic-regression.html"
+                       rel="bookmark"
+                       title="Permalink to Logistic Regression">
+                        Logistic Regression
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-02-24T00:00:00-05:00"> Sat 24 February 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/machine-learning.html">Machine Learning</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>stats<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Split data in training and test sets</h3>
+<div class="highlight"><pre><span></span><span class="kp">set.seed</span><span class="p">(</span><span class="m">90</span><span class="p">)</span>
+n <span class="o">&lt;-</span> <span class="kp">nrow</span><span class="p">(</span>CO2<span class="p">)</span>
+index <span class="o">=</span> <span class="kp">sample</span><span class="p">(</span><span class="m">1</span><span class="o">:</span>n<span class="p">,</span> size <span class="o">=</span> <span class="kp">round</span><span class="p">(</span><span class="m">0.75</span><span class="o">*</span>n<span class="p">),</span> replace <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
+train <span class="o">=</span> CO2<span class="p">[</span>index<span class="p">,</span> <span class="p">]</span>
+test <span class="o">=</span> CO2<span class="p">[</span><span class="o">-</span>index<span class="p">,</span> <span class="p">]</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Logistic model predicting <em>Treatment</em> from <em>CO2</em> train dataset</h3>
+<div class="highlight"><pre><span></span><span class="kp">class</span><span class="p">(</span>CO2<span class="o">$</span>Treatment<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] &quot;factor&quot;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>log_mod_train <span class="o">&lt;-</span> glm<span class="p">(</span>Treatment <span class="o">~</span> Type <span class="o">+</span> conc <span class="o">+</span> uptake<span class="p">,</span> data <span class="o">=</span> train<span class="p">,</span> family <span class="o">=</span> binomial<span class="p">(</span>link <span class="o">=</span> <span class="s">&quot;logit&quot;</span><span class="p">))</span>
+<span class="kp">summary</span><span class="p">(</span>log_mod_train<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## 
+## Call:
+## glm(formula = Treatment ~ Type + conc + uptake, family = binomial(link = &quot;logit&quot;), 
+##     data = train)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.5326  -0.7801  -0.4139   0.8967   1.7586  
+## 
+## Coefficients:
+##                  Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)      5.746515   1.752166   3.280 0.001039 ** 
+## TypeMississippi -3.084621   1.062665  -2.903 0.003699 ** 
+## conc             0.003917   0.001567   2.499 0.012449 *  
+## uptake          -0.217115   0.060521  -3.587 0.000334 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 87.194  on 62  degrees of freedom
+## Residual deviance: 66.050  on 59  degrees of freedom
+## AIC: 74.05
+## 
+## Number of Fisher Scoring iterations: 5
+</pre></div>
+
+
+<p><br></p>
+<h3>Predict model on test data and calculate model accuracy</h3>
+<div class="highlight"><pre><span></span>test<span class="o">$</span>predictions <span class="o">&lt;-</span> predict<span class="p">(</span>log_mod_train<span class="p">,</span> test<span class="p">,</span> type <span class="o">=</span> <span class="s">&quot;response&quot;</span><span class="p">)</span>
+acc_tab <span class="o">&lt;-</span> base<span class="o">::</span><span class="kp">table</span><span class="p">(</span>test<span class="o">$</span>Treatment<span class="p">,</span> test<span class="o">$</span>predictions <span class="o">&gt;</span> <span class="m">0.5</span><span class="p">)</span>
+<span class="kp">round</span><span class="p">(</span><span class="kp">sum</span><span class="p">(</span><span class="kp">diag</span><span class="p">(</span>acc_tab<span class="p">))</span><span class="o">/</span><span class="kp">sum</span><span class="p">(</span>acc_tab<span class="p">),</span> <span class="m">3</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 0.667
+</pre></div>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 2 of the Machine Learning series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/linear-regression.html">Linear Regression</a></li>
+       </ul>
+       <h5>Next articles</h5>
+       <ul>
+           <li><a href="/partition-data-frame-in-training-and-test-data.html">Partition Data Frame in Training and Test Data</a></li>
+           <li><a href="/stepwise-regression-forward-backward-both.html">Stepwise Regression (Forward, Backward, Both)</a></li>
+           <li><a href="/decision-tree-classification.html">Decision Tree (Classification)</a></li>
+           <li><a href="/k-nearest-neighbor-classification.html">K-Nearest Neighbor (Classification)</a></li>
+           <li><a href="/naive-bayes-classification.html">Naive Bayes (Classification)</a></li>
+           <li><a href="/principle-component-analysis-pca.html">Principle Component Analysis (PCA)</a></li>
+           <li><a href="/random-forest-classification.html">Random Forest (Classification)</a></li>
+           <li><a href="/support-vector-machines-svm.html">Support Vector Machines (SVM)</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

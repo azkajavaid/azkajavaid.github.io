@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Twitter Analytics Application - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/twitter-analytics-application.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="Twitter Analytics Application uses the twitteR package to perform a live profile analysis of a user (timeline and favorite tweets) and topic&#39;s tweets. This analysis is accomplished via sentiment, text, emoji and geographic analysis of a user&#39;s tweets, user&#39;s tweeting habits across time metrics like hour, week, month and year …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Twitter Analytics Application"/>
+        <meta property="og:url" content="/twitter-analytics-application.html"/>
+        <meta property="og:description" content="Twitter Analytics Application uses the twitteR package to perform a live profile analysis of a user (timeline and favorite tweets) and topic&#39;s tweets. This analysis is accomplished via sentiment, text, emoji and geographic analysis of a user&#39;s tweets, user&#39;s tweeting habits across time metrics like hour, week, month and year …"/>
+        <meta property="article:published_time" content="2018-04-07" />
+            <meta property="article:section" content="Shiny App" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li >
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li >
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/twitter-analytics-application.html"
+                       rel="bookmark"
+                       title="Permalink to Twitter Analytics Application">
+                        Twitter Analytics Application
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-04-07T00:00:00-04:00"> Sat 07 April 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/shiny-app.html">Shiny App</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <h5>Twitter Analytics Application uses the <em>twitteR</em> package to perform a live profile analysis of a user (timeline and favorite tweets) and topic's tweets. This analysis is accomplished via sentiment, text, emoji and geographic analysis of a user's tweets, user's tweeting habits across time metrics like hour, week, month and year and across platform metrics like Instagram, iPhone and Twitter Web Client as well as network analysis of that user's followers/following. Data analysis and visualization is performed via data tables, word cloud, bar plot, time series and network plots. Shiny application is hosted via shinyapps.io, RStudio's hosting service for Shiny apps, accessible at <a href="https://aj17.shinyapps.io/twitteranalytics/">Shiny Application</a>. For full code, see <a href="https://github.com/azkajavaid/TwitterAnalytics">GitHub</a>.</h5>
+<p>In this blog post, I highlight features of this application. I also plan to provide a brief overview of accessing and displaying API data via Shiny applications.</p>
+<p>Following packages were used for this application.</p>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>shiny<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>twitteR<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>plyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>stringr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>wordcloud<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>tidytext<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>reshape2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>ggplot2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>plotly<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>lubridate<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>scales<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>translate<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>ggmap<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>maptools<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>maps<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>leaflet<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>stringi<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>rtimes<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>igraph<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>visNetwork<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>data.table<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>mosaic<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>RColorBrewer<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>tidyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>ggthemes<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>Rgraphviz<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>tm<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>zoo<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>slam<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>topicmodels<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dichromat<span class="p">)</span>
+</pre></div>
+
+
+<h3>Retrieving Tweets via twitteR</h3>
+<p>All tweets for this application are retrieved using the <em>twitteR</em> package, which provides access to the Twitter API. Following package installation, OAuth authentication is established by setting up an API key and API secret, both of which can be retrieved from the Twitter app page. See code below for details on setting up authentication using personal consumer key and secret and access token and secret.</p>
+<div class="highlight"><pre><span></span>reqURL <span class="o">&lt;-</span> <span class="s">&quot;https://api.twitter.com/oauth/request_token&quot;</span>
+accessURL <span class="o">&lt;-</span> <span class="s">&quot;https://api.twitter.com/oauth/access_token&quot;</span>
+authURL <span class="o">&lt;-</span> <span class="s">&quot;https://api.twitter.com/oauth/authorize&quot;</span>
+
+set.key<span class="p">(</span><span class="s">&quot;KEY&quot;</span><span class="p">)</span>
+
+setup_twitter_oauth<span class="p">(</span>consumer_key<span class="p">,</span> consumer_secret<span class="p">,</span> access_token<span class="p">,</span> access_secret<span class="p">)</span>
+</pre></div>
+
+
+<h3>Tweets Table</h3>
+<p>Live tweets are retrieved and displayed via <em>dataTable</em> for the specified user. Tweets and replies are shown in text along with tweet favorite count, replier Twitter handle, tweet creation date, retweet count and latitude and longitude information if location is indicated. The <em>twitteR</em> interface to the Twitter API allows for easy tweet retrieval from user timeline, user favorites as well as general topic related tweets. For example, as the code chunk below shows, the function <em>userTimeline</em> can be used to retrieve a user's Twitter timeline given parameters like specified number of tweets and features like <em>excludeReplies</em> which can be used to exclude replies from resulting data. In addition to user timelines, user favorites can be captured by the <em>favorites</em> function, which returns the n recently favorite tweets for a given user. Tweets related to a topic can be captured by the <em>searchTwitter</em> function, which searches for the specified number of tweets for a given topic/search query. Following tweet retrieval, <em>twListToDF</em> from the <em>twitteR</em> package converts the twitteR list to data.frame.</p>
+<p>Code below shows an example retrieval of my favorite tweets from my timeline, presented in a data table format as shown by the following image. <img alt="&quot;image&quot;" height="500px" src="images/favoriteTweets.png" width="860px"></p>
+<div class="highlight"><pre><span></span><span class="c1">#user input is captured in the server and action button is used to retrieve data about the specified individual&#39;s tweets.</span>
+userFavoriteData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showUserFav<span class="p">,</span> <span class="p">{</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    tweets <span class="o">&lt;-</span> favorites<span class="p">(</span>input<span class="o">$</span>twitterUser2<span class="p">,</span> n <span class="o">=</span> input<span class="o">$</span>tweetNum2<span class="p">)</span>
+    incProgress<span class="p">(</span><span class="m">0.7</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting favorite tweets&quot;</span><span class="p">)</span>
+    tab <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+    tab2 <span class="o">&lt;-</span> tab<span class="p">[</span><span class="o">!</span><span class="kp">duplicated</span><span class="p">(</span>tab<span class="p">[,</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;text&quot;</span><span class="p">)]),</span> <span class="p">]</span>
+    tab2 <span class="o">&lt;-</span> tab2 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>
+      text<span class="p">,</span> favoriteCount<span class="p">,</span> replyToSN<span class="p">,</span> created<span class="p">,</span> truncated<span class="p">,</span> replyToSID<span class="p">,</span> id<span class="p">,</span> replyToUID<span class="p">,</span> statusSource<span class="p">,</span> screenName<span class="p">,</span> retweetCount<span class="p">,</span>
+      isRetweet<span class="p">,</span> retweeted<span class="p">,</span> longitude<span class="p">,</span> latitude
+    <span class="p">)</span>
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    <span class="kr">return</span><span class="p">(</span>tab2<span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+
+output<span class="o">$</span>userFavorite <span class="o">&lt;-</span> renderDataTable<span class="p">({</span>
+  userFavoriteData<span class="p">()</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Tweets table feature also retrieves additional information about the specified individual, including his/her screen name, description, account creation date, location and user's friends, statuses and favorites count using the <em>getUser</em> function from the <em>twitteR</em> library. Following code chunk shows how retrieved information about the specified individual is stored and organized in a table.</p>
+<div class="highlight"><pre><span></span><span class="c1">#retrieving user information (name, screen name, description, count of friends, status and favorite tweets, account creation date and location if indicated on their public profile)</span>
+userInfoData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showUserInfo<span class="p">,</span> <span class="p">{</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Loading application&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    search.string <span class="o">&lt;-</span> input<span class="o">$</span>twitterUser1
+    user <span class="o">&lt;-</span> getUser<span class="p">(</span>search.string<span class="p">)</span> <span class="c1"># retrieve information about a Twitter user</span>
+    incProgress<span class="p">(</span><span class="m">0.4</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting user data&quot;</span><span class="p">)</span>
+    ScreenName <span class="o">&lt;-</span> user<span class="o">$</span>screenName
+    Name <span class="o">&lt;-</span> user<span class="o">$</span>name
+    Description <span class="o">&lt;-</span> user<span class="o">$</span>description
+    FavoritesCount <span class="o">&lt;-</span> user<span class="o">$</span>favoritesCount
+    FriendsCount <span class="o">&lt;-</span> user<span class="o">$</span>friendsCount
+    StatusCount <span class="o">&lt;-</span> user<span class="o">$</span>statusesCount
+    AccountCreated <span class="o">&lt;-</span> <span class="kp">date</span><span class="p">(</span>user<span class="o">$</span>created<span class="p">)</span>
+    AccountCreated <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>AccountCreated<span class="p">)</span>
+    Location <span class="o">&lt;-</span> user<span class="o">$</span>location
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Processing&quot;</span><span class="p">)</span>
+    userInfo <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>
+      ScreenName<span class="p">,</span> Name<span class="p">,</span> Description<span class="p">,</span>
+      FriendsCount<span class="p">,</span> StatusCount<span class="p">,</span> FavoritesCount<span class="p">,</span>
+      AccountCreated<span class="p">,</span> Location
+    <span class="p">)</span>
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing&quot;</span><span class="p">)</span>
+    <span class="kr">return</span><span class="p">(</span>userInfo<span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<h3>Tweet Statistics</h3>
+<p>In this section, individual's Twitter use across time metrics like hour, weekday, month and year is assessed. In addition, individual's Twitter use across platforms like Hootsuite, Instagram, iPhone and Web Client is analyzed and displayed via bar plot and data table. Individual's Twitter use across time is captured by metrics like the <em>created</em> attribute, returned using the <em>favorites</em> and <em>twListToDF</em> functions, which indicates time and date of each tweet. The time and day metrics are parsed to obtain the year, month and day of week information for each tweet. User device (mobile, web client or platform used to send that tweet) attribute is captured by the <em>statusSource</em> feature. Metrics from both <em>created</em> and <em>statusSource</em> attributes are parsed and processed to produce plotly rendered bar plots (see code below for further details).</p>
+<div class="highlight"><pre><span></span><span class="c1">#retrieving user favorite data</span>
+tweetStatisticsData_fav <span class="o">&lt;-</span> <span class="kp">suppressWarnings</span><span class="p">(</span>eventReactive<span class="p">(</span>input<span class="o">$</span>showTweetStats_fav<span class="p">,</span> <span class="p">{</span>
+  tweets <span class="o">&lt;-</span> favorites<span class="p">(</span>input<span class="o">$</span>twitterUser4_fav<span class="p">,</span> n <span class="o">=</span> input<span class="o">$</span>tweetNum4_fav<span class="p">)</span>
+  tab <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+  tab<span class="o">$</span>hour <span class="o">&lt;-</span> hour<span class="p">(</span>with_tz<span class="p">(</span>tab<span class="o">$</span>created<span class="p">,</span> <span class="s">&quot;EST&quot;</span><span class="p">))</span>
+  tab<span class="o">$</span>date <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>tab<span class="o">$</span>created<span class="p">)</span>
+  tab<span class="o">$</span>year <span class="o">&lt;-</span> year<span class="p">(</span>tab<span class="o">$</span><span class="kp">date</span><span class="p">)</span>
+  tab<span class="o">$</span>year <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>tab<span class="o">$</span>year<span class="p">)</span>
+  tab<span class="o">$</span>month <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">months</span><span class="p">(</span>tab<span class="o">$</span><span class="kp">date</span><span class="p">))</span>
+  tab<span class="o">$</span>weekday <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">weekdays</span><span class="p">(</span>tab<span class="o">$</span><span class="kp">date</span><span class="p">))</span>
+  tab<span class="o">$</span>weekday <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>tab<span class="o">$</span>weekday<span class="p">,</span> levels <span class="o">=</span> <span class="kt">c</span><span class="p">(</span>
+    <span class="s">&quot;Sunday&quot;</span><span class="p">,</span> <span class="s">&quot;Monday&quot;</span><span class="p">,</span>
+    <span class="s">&quot;Tuesday&quot;</span><span class="p">,</span> <span class="s">&quot;Wednesday&quot;</span><span class="p">,</span> <span class="s">&quot;Thursday&quot;</span><span class="p">,</span> <span class="s">&quot;Friday&quot;</span><span class="p">,</span> <span class="s">&quot;Saturday&quot;</span>
+  <span class="p">))</span>
+  tab<span class="o">$</span>hour <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>tab<span class="o">$</span>hour<span class="p">)</span>
+
+  tab<span class="o">$</span>statusSource <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>tab<span class="o">$</span>statusSource<span class="p">)</span>
+  tab<span class="o">$</span>statusSource <span class="o">&lt;-</span> <span class="kp">regmatches</span><span class="p">(</span>tab<span class="o">$</span>statusSource<span class="p">,</span> <span class="kp">gregexpr</span><span class="p">(</span><span class="s">&quot;(?&lt;=&gt;).*?(?=&lt;)&quot;</span><span class="p">,</span> tab<span class="o">$</span>statusSource<span class="p">,</span> perl <span class="o">=</span> <span class="kc">TRUE</span><span class="p">))</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span><span class="kp">unlist</span><span class="p">(</span>tab<span class="o">$</span>statusSource<span class="p">))</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>tab<span class="o">$</span>platform<span class="p">)</span>
+
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Twitter Web Client&quot;</span><span class="p">,</span> <span class="s">&quot;Web Client&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Twitter for iPhone&quot;</span><span class="p">,</span> <span class="s">&quot;iPhone&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Twitter for Android&quot;</span><span class="p">,</span> <span class="s">&quot;Android&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Twitter for Mac&quot;</span><span class="p">,</span> <span class="s">&quot;Mac&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Twitter for iOS&quot;</span><span class="p">,</span> <span class="s">&quot;iOS&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Twitter for iPad&quot;</span><span class="p">,</span> <span class="s">&quot;iPad&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Tweetbot for Mac&quot;</span><span class="p">,</span> <span class="s">&quot;Mac bot&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Tweetbot for iOS&quot;</span><span class="p">,</span> <span class="s">&quot;iOS bot&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+  tab<span class="o">$</span>platform <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;Meme_Twitterbot&quot;</span><span class="p">,</span> <span class="s">&quot;Meme bot&quot;</span><span class="p">,</span> tab<span class="o">$</span>platform<span class="p">)</span>
+
+  tab <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>tab<span class="p">,</span> platform <span class="o">!=</span> <span class="s">&quot;rtapp315156161&quot;</span><span class="p">)</span>
+  tab<span class="o">$</span>weekday <span class="o">&lt;-</span> mapvalues<span class="p">(</span>tab<span class="o">$</span>weekday<span class="p">,</span> from <span class="o">=</span> <span class="kt">c</span><span class="p">(</span>
+    <span class="s">&quot;Sunday&quot;</span><span class="p">,</span> <span class="s">&quot;Monday&quot;</span><span class="p">,</span> <span class="s">&quot;Tuesday&quot;</span><span class="p">,</span>
+    <span class="s">&quot;Wednesday&quot;</span><span class="p">,</span> <span class="s">&quot;Thursday&quot;</span><span class="p">,</span> <span class="s">&quot;Friday&quot;</span><span class="p">,</span>
+    <span class="s">&quot;Saturday&quot;</span>
+  <span class="p">),</span> to <span class="o">=</span> <span class="kt">c</span><span class="p">(</span>
+    <span class="s">&quot;Su&quot;</span><span class="p">,</span> <span class="s">&quot;M&quot;</span><span class="p">,</span> <span class="s">&quot;Tu&quot;</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">,</span>
+    <span class="s">&quot;Th&quot;</span><span class="p">,</span> <span class="s">&quot;F&quot;</span><span class="p">,</span> <span class="s">&quot;Sa&quot;</span>
+  <span class="p">))</span>
+  <span class="kr">return</span><span class="p">(</span>tab<span class="p">)</span>
+<span class="p">}))</span>
+
+<span class="c1">#plotting user&#39;s Twitter use statistics</span>
+output<span class="o">$</span>countBarPlot_fav <span class="o">&lt;-</span> renderPlotly<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    incProgress<span class="p">(</span><span class="m">0.7</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting tweets&quot;</span><span class="p">)</span>
+    tab <span class="o">&lt;-</span> tweetStatisticsData_fav<span class="p">()</span>
+    join5 <span class="o">&lt;-</span> tab <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by_<span class="p">(</span>input<span class="o">$</span>chooseTime_Platform1_fav<span class="p">,</span> input<span class="o">$</span>chooseTime_Platform2_fav<span class="p">)</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>summarise<span class="p">(</span>word <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>text<span class="p">,</span> collapse <span class="o">=</span> <span class="s">&quot;a`&quot;</span><span class="p">),</span> n <span class="o">=</span> n<span class="p">())</span>
+    join5<span class="o">$</span>n <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>join5<span class="o">$</span>n<span class="p">)</span>
+    <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>join5<span class="p">))</span>
+    <span class="p">{</span>
+      join5<span class="o">$</span>word<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="kp">unique</span><span class="p">((</span><span class="kp">strsplit</span><span class="p">(</span>join5<span class="o">$</span>word<span class="p">[</span>i<span class="p">],</span> <span class="s">&quot;\n&quot;</span><span class="p">))[[</span><span class="m">1</span><span class="p">]]),</span> collapse <span class="o">=</span> <span class="s">&quot;\n&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    tab <span class="o">&lt;-</span> join5
+    tab<span class="o">$</span>count <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>tab<span class="o">$</span>n<span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Plotting&quot;</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="p">((</span>input<span class="o">$</span>chooseTime_Platform2_fav<span class="p">)</span> <span class="o">==</span> <span class="s">&quot;hour&quot;</span><span class="p">)</span> <span class="p">{</span>
+      tab <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>tab<span class="p">)</span>
+      tab<span class="p">[,</span> <span class="m">2</span><span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>tab<span class="p">[,</span> <span class="m">2</span><span class="p">]))</span>
+      p2 <span class="o">&lt;-</span> ggplot<span class="p">(</span>tab<span class="p">,</span> aes_string<span class="p">(</span>x <span class="o">=</span> input<span class="o">$</span>chooseTime_Platform1_fav<span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;n&quot;</span><span class="p">,</span> fill <span class="o">=</span> input<span class="o">$</span>chooseTime_Platform2_fav<span class="p">))</span> <span class="o">+</span>
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span> <span class="o">+</span> theme_bw<span class="p">()</span>
+      ggplotly<span class="p">(</span>p2<span class="p">,</span> tooltip <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="s">&quot;fill&quot;</span><span class="p">,</span> <span class="s">&quot;y&quot;</span><span class="p">),</span> <span class="kn">source</span> <span class="o">=</span> <span class="s">&quot;countBarPlot_fav&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="p">{</span>
+      p2 <span class="o">&lt;-</span> ggplot<span class="p">(</span>tab<span class="p">,</span> aes_string<span class="p">(</span>x <span class="o">=</span> input<span class="o">$</span>chooseTime_Platform1_fav<span class="p">,</span> y <span class="o">=</span> <span class="s">&quot;n&quot;</span><span class="p">,</span> fill <span class="o">=</span> input<span class="o">$</span>chooseTime_Platform2_fav<span class="p">))</span> <span class="o">+</span>
+        geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">)</span> <span class="o">+</span> theme_bw<span class="p">()</span>
+      ggplotly<span class="p">(</span>p2<span class="p">,</span> tooltip <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="s">&quot;fill&quot;</span><span class="p">,</span> <span class="s">&quot;y&quot;</span><span class="p">),</span> <span class="kn">source</span> <span class="o">=</span> <span class="s">&quot;countBarPlot_fav&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Image below shows data about my (azkajavaid17) favorite tweets by day of week and tweet platform. Plot click shows my favorite tweets on Friday via iPhone (on podcasts and data visualization) in a table format.
+<img alt="&quot;image&quot;" height="500px" src="images/TweetStats1.png" width="860px"></p>
+<h3>Word Cloud</h3>
+<p>Word cloud analysis is performed next to visualize user/topic's tweets. As code below shows, tweets related to <em>rstats</em> are initially captured by the <em>searchTwitter</em> function and processed to remove retweets and stop words following tokenization. After text processing, words are tallied and arranged in descending order. Finally this dataset is used for plotting via <em>wordcloud</em> from the <em>wordcloud</em> library. The sequential descending order of tallied words is visualized by color gradation, achieved by passing the darker hues of the blues palette as an input to the <em>brewer.pal</em> function from the <em>RColorBrewer</em> package. These shades are then passed as an input to the <em>colorRampPalette</em> from the <em>dichromat</em> package, which interpolates these colors to create a new palette. This new palette is then fed into the colors attribute of the <em>wordcloud</em> function. In addition to the wordcloud, dotplot indicating words and attributed counts is plotted using ggplot and rendered to a plotly object using <em>ggplotly</em> from the <em>plotly</em> package. The <em>tooltip</em> attribute of the <em>ggplotly</em> function is used to highlight specified features with a user hover (word label and count), thereby providing an interactive experience for the app user.</p>
+<div class="highlight"><pre><span></span><span class="c1">#retrieving topic related tweets</span>
+topicCloudData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showTopicCloud<span class="p">,</span> <span class="p">{</span>
+  tweets <span class="o">&lt;-</span> searchTwitter<span class="p">(</span>input<span class="o">$</span>twitterUser7<span class="p">,</span> n <span class="o">=</span> input<span class="o">$</span>tweetNum7<span class="p">)</span>
+  tab <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+  reg <span class="o">&lt;-</span> <span class="s">&quot;([^A-Za-z_\\d#@&#39;]|&#39;(?![A-Za-z_\\d#@]))&quot;</span>
+  tab2 <span class="o">&lt;-</span> tab <span class="o">%&gt;%</span>
+    dplyr<span class="o">::</span>filter<span class="p">(</span><span class="o">!</span>str_detect<span class="p">(</span>text<span class="p">,</span> <span class="s">&quot;^RT&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+    dplyr<span class="o">::</span>mutate<span class="p">(</span>text <span class="o">=</span> str_replace_all<span class="p">(</span>text<span class="p">,</span> <span class="s">&quot;http\\w+&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+    unnest_tokens<span class="p">(</span>word<span class="p">,</span> text<span class="p">,</span> token <span class="o">=</span> <span class="s">&quot;regex&quot;</span><span class="p">,</span> pattern <span class="o">=</span> reg<span class="p">)</span> <span class="o">%&gt;%</span>
+    dplyr<span class="o">::</span>filter<span class="p">(</span>
+      <span class="o">!</span>word <span class="o">%in%</span> stop_words<span class="o">$</span>word<span class="p">,</span>
+      str_detect<span class="p">(</span>word<span class="p">,</span> <span class="s">&quot;[a-z]&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+  tab2 <span class="o">&lt;-</span> tab2 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>word<span class="p">)</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>summarise<span class="p">(</span>n <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>arrange<span class="p">(</span>desc<span class="p">(</span>n<span class="p">))</span>
+  <span class="kr">return</span><span class="p">(</span>tab2<span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">#plotting word cloud of user/topic&#39;s tweets</span>
+output<span class="o">$</span>tweetTopicCloud <span class="o">&lt;-</span> renderPlot<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    col <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span>colorRampPalette<span class="p">(</span>brewer.pal<span class="p">(</span><span class="m">9</span><span class="p">,</span> <span class="s">&quot;Blues&quot;</span><span class="p">))(</span><span class="m">50</span><span class="p">))[[</span><span class="m">1</span><span class="p">]][</span><span class="m">37</span><span class="o">:</span><span class="m">50</span><span class="p">]</span>
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Building word cloud&quot;</span><span class="p">)</span>
+    tab <span class="o">&lt;-</span> topicCloudData<span class="p">()</span>
+    incProgress<span class="p">(</span><span class="m">0.7</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    tab2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>tab<span class="p">,</span> n <span class="o">&gt;=</span> input<span class="o">$</span>minWords3<span class="p">)</span>
+    wordcloud<span class="p">(</span>
+      words <span class="o">=</span> tab2<span class="o">$</span>word<span class="p">,</span> freq <span class="o">=</span> tab2<span class="o">$</span>n<span class="p">,</span> min.freq <span class="o">=</span> input<span class="o">$</span>minWords3<span class="p">,</span> scale <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">3</span><span class="p">,</span> <span class="m">2</span><span class="p">),</span> rot.per <span class="o">=</span> <span class="m">0</span><span class="p">,</span>
+      colors <span class="o">=</span> <span class="kp">col</span>
+    <span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="c1">#table of raw word cloud counts for topic tweets</span>
+output<span class="o">$</span>topicTweetsCloudTab <span class="o">&lt;-</span> renderPlotly<span class="p">({</span>
+  tab <span class="o">&lt;-</span> topicCloudData<span class="p">()</span>
+  incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Building table&quot;</span><span class="p">)</span>
+  tab2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>tab<span class="p">,</span> n <span class="o">&gt;=</span> input<span class="o">$</span>minWords3<span class="p">)</span>
+  tab2 <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>tab2<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;word&quot;</span> <span class="o">=</span> <span class="s">&quot;Word&quot;</span><span class="p">))</span>
+  tab2 <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>tab2<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;n&quot;</span> <span class="o">=</span> <span class="s">&quot;WordCount&quot;</span><span class="p">))</span>
+  incProgress<span class="p">(</span><span class="m">0.7</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+  y.text <span class="o">&lt;-</span> element_text<span class="p">(</span>size <span class="o">=</span> <span class="m">8</span><span class="p">)</span>
+
+  tab2<span class="o">$</span>Word <span class="o">&lt;-</span> <span class="kp">factor</span><span class="p">(</span>tab2<span class="o">$</span>Word<span class="p">,</span> levels <span class="o">=</span> tab2<span class="o">$</span>Word<span class="p">[</span><span class="kp">order</span><span class="p">(</span>tab2<span class="o">$</span>WordCount<span class="p">)])</span>
+  favTweets <span class="o">&lt;-</span> ggplot<span class="p">(</span>tab2<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> WordCount<span class="p">,</span> y <span class="o">=</span> Word<span class="p">))</span> <span class="o">+</span> geom_point<span class="p">(</span>size <span class="o">=</span> <span class="m">2</span><span class="p">,</span> color <span class="o">=</span> <span class="s">&quot;#2575B7&quot;</span><span class="p">)</span> <span class="o">+</span>
+    ggtitle<span class="p">(</span><span class="s">&quot;Word Cloud Count&quot;</span><span class="p">)</span> <span class="o">+</span> theme_bw<span class="p">()</span> <span class="o">+</span> theme<span class="p">(</span>axis.title.y <span class="o">=</span> element_blank<span class="p">(),</span> axis.text.y <span class="o">=</span> y.text<span class="p">)</span>
+  ggplotly<span class="p">(</span>favTweets<span class="p">,</span> tooltip <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="s">&quot;y&quot;</span><span class="p">))</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Image below shows word cloud and dot plot data related to topic tweets about #rstats. Word cloud terms include sapply, #machinelearning, #sql and #ai amongst others. <img alt="&quot;image&quot;" src="images/WordCloud1.png">. The associated dotplot shows frequency of words mentioned most often in tweets related to #rstats, including #sql, functions, #datascience, #datamining and #data. <img alt="&quot;image&quot;" src="images/WordCloud2.png">.</p>
+<h3>Topic Modeling</h3>
+<p>Next feature performs topic modeling to classify user tweets using Latent Dirichlet allocation (LDA). As code chunk below shows, text for the specified user is processed as input along with the tweet number and topic count. Retrieved tweets are converted to a corpus and transformed to a Document Term Matrix (DTM). The DTM is further processed using the <em>tidy</em> function from the <em>tidytext</em> package (originally from the <em>broom</em> package), which is used to extract per-topic-per-word probabilities (beta). Tidied data is then fed into the LDA function from the <em>topicmodels</em> package and further processed to produce the topics plot using <em>ggplotly</em>.</p>
+<div class="highlight"><pre><span></span><span class="c1">#retrieving user favorite tweets</span>
+userFavTopicData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showTopicModelFavorite<span class="p">,</span> <span class="p">{</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    tweets <span class="o">&lt;-</span> favorites<span class="p">(</span>input<span class="o">$</span>twitterUser2_topic<span class="p">,</span> n <span class="o">=</span> input<span class="o">$</span>tweetNum2_topic<span class="p">)</span>
+    tab <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+
+    reg <span class="o">&lt;-</span> <span class="s">&quot;([^A-Za-z_\\d#@&#39;]|&#39;(?![A-Za-z_\\d#@]))&quot;</span>
+    tab2 <span class="o">&lt;-</span> tab <span class="o">%&gt;%</span>
+      dplyr<span class="o">::</span>filter<span class="p">(</span><span class="o">!</span>str_detect<span class="p">(</span>text<span class="p">,</span> <span class="s">&quot;^RT&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+      dplyr<span class="o">::</span>mutate<span class="p">(</span>text <span class="o">=</span> str_replace_all<span class="p">(</span>text<span class="p">,</span> <span class="s">&quot;http\\w+&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+
+    tweets <span class="o">&lt;-</span> <span class="kp">sapply</span><span class="p">(</span>tab2<span class="o">$</span>text<span class="p">,</span> <span class="kr">function</span><span class="p">(</span><span class="kp">row</span><span class="p">)</span> <span class="kp">iconv</span><span class="p">(</span><span class="kp">row</span><span class="p">,</span> <span class="s">&quot;latin1&quot;</span><span class="p">,</span> <span class="s">&quot;ASCII&quot;</span><span class="p">,</span> sub <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+
+    incProgress<span class="p">(</span><span class="m">0.6</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Collecting Tweets...&quot;</span><span class="p">)</span>
+    corpus <span class="o">&lt;-</span> Corpus<span class="p">(</span>VectorSource<span class="p">(</span>tweets<span class="p">))</span>
+    corpus <span class="o">&lt;-</span> tm_map<span class="p">(</span>corpus<span class="p">,</span> removePunctuation<span class="p">)</span>
+    corpus <span class="o">&lt;-</span> tm_map<span class="p">(</span>corpus<span class="p">,</span> stripWhitespace<span class="p">)</span>
+    corpus <span class="o">&lt;-</span> tm_map<span class="p">(</span>corpus<span class="p">,</span> <span class="kp">tolower</span><span class="p">)</span>
+    corpus <span class="o">&lt;-</span> tm_map<span class="p">(</span>corpus<span class="p">,</span> removeWords<span class="p">,</span> stopwords<span class="p">(</span><span class="s">&quot;english&quot;</span><span class="p">))</span>
+    tdm <span class="o">&lt;-</span> DocumentTermMatrix<span class="p">(</span>corpus<span class="p">)</span>
+
+    term_tfidf <span class="o">&lt;-</span> <span class="kp">tapply</span><span class="p">(</span>tdm<span class="o">$</span>v <span class="o">/</span> row_sums<span class="p">(</span>tdm<span class="p">)[</span>tdm<span class="o">$</span>i<span class="p">],</span> tdm<span class="o">$</span>j<span class="p">,</span> <span class="kp">mean</span><span class="p">)</span> <span class="o">*</span> <span class="kp">log2</span><span class="p">(</span>nDocs<span class="p">(</span>tdm<span class="p">)</span> <span class="o">/</span> col_sums<span class="p">(</span>tdm <span class="o">&gt;</span> <span class="m">0</span><span class="p">))</span>
+
+    incProgress<span class="p">(</span><span class="m">0.4</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    tdm <span class="o">&lt;-</span> tdm<span class="p">[,</span> term_tfidf <span class="o">&gt;=</span> <span class="m">0.1</span><span class="p">]</span>
+    tdm <span class="o">&lt;-</span> tdm<span class="p">[</span>row_sums<span class="p">(</span>tdm<span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span><span class="p">,</span> <span class="p">]</span>
+    <span class="kr">return</span><span class="p">(</span>tdm<span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="c1">#output topic plot using ggplotly</span>
+output<span class="o">$</span>userFavoritesTopic <span class="o">&lt;-</span> renderPlotly<span class="p">({</span>
+  tdm <span class="o">&lt;-</span> userFavTopicData<span class="p">()</span>
+
+  chapters_lda <span class="o">&lt;-</span> LDA<span class="p">(</span>tdm<span class="p">,</span> k <span class="o">=</span> input<span class="o">$</span>topicNumber2_topic<span class="p">,</span> control <span class="o">=</span> <span class="kt">list</span><span class="p">(</span>seed <span class="o">=</span> <span class="m">900</span><span class="p">))</span>
+  chapter_topics <span class="o">&lt;-</span> tidy<span class="p">(</span>chapters_lda<span class="p">,</span> <span class="kt">matrix</span> <span class="o">=</span> <span class="s">&quot;beta&quot;</span><span class="p">)</span>
+
+  top_terms <span class="o">&lt;-</span> chapter_topics <span class="o">%&gt;%</span>
+    group_by<span class="p">(</span>topic<span class="p">)</span> <span class="o">%&gt;%</span>
+    top_n<span class="p">(</span>input<span class="o">$</span>topWords2User<span class="p">,</span> <span class="kp">beta</span><span class="p">)</span> <span class="o">%&gt;%</span>
+    ungroup<span class="p">()</span> <span class="o">%&gt;%</span>
+    arrange<span class="p">(</span>topic<span class="p">,</span> <span class="o">-</span><span class="kp">beta</span><span class="p">)</span>
+
+  top_terms<span class="o">$</span>term <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>top_terms<span class="o">$</span>term<span class="p">)</span>
+  topicPlot <span class="o">&lt;-</span> top_terms <span class="o">%&gt;%</span>
+    mutate<span class="p">(</span>term <span class="o">=</span> reorder<span class="p">(</span>term<span class="p">,</span> <span class="kp">beta</span><span class="p">))</span> <span class="o">%&gt;%</span>
+    ggplot<span class="p">(</span>aes<span class="p">(</span>term<span class="p">,</span> <span class="kp">beta</span><span class="p">))</span> <span class="o">+</span>
+    facet_wrap<span class="p">(</span><span class="o">~</span> topic<span class="p">,</span> scales <span class="o">=</span> <span class="s">&quot;free&quot;</span><span class="p">)</span> <span class="o">+</span> coord_flip<span class="p">()</span> <span class="o">+</span> geom_point<span class="p">(</span>size <span class="o">=</span> <span class="m">2</span><span class="p">,</span> colour <span class="o">=</span> <span class="s">&quot;#00aced&quot;</span><span class="p">)</span> <span class="o">+</span> theme_bw<span class="p">()</span> <span class="o">+</span> theme<span class="p">(</span>axis.text.y <span class="o">=</span> element_text<span class="p">(</span>size <span class="o">=</span> <span class="m">8</span><span class="p">))</span>
+
+  ggplotly<span class="p">(</span>topicPlot<span class="p">)</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Following image shows a topic model of my recent favorite tweets (azkajavaid17), classifying them in three topics. While the topic labels cannot be distinctly determined, the first topic aligns towards package development (rstats, package, hadleywickham), second topic fits into data visualization platforms (shiny, design) and third topic relates to career development (career, science).
+<img alt="&quot;image&quot;" height="500px" src="images/TopicModel-1.png" width="860px"></p>
+<h3>Sentiment Analysis</h3>
+<h4>Word Cloud</h4>
+<p>Following topic modeling, sentiment analysis was performed using Julia Silge and David Robinson's <em>tidytext</em> package. Given a specified user and tweet number, sentiment word cloud, bar plot and time series are produced. Interactive time series feature also allows retrieval of tweets associated with either positive/negative sentiment for the clicked date. Sentiment analysis is performed using the <em>sentiments</em> data from the <em>tidytext</em> package, which contains data from three different lexicons. Lexicons include data from the NRC Emotion Lexicon from Saif Mohammad and Peter Turney, the sentiment lexicon from Bing Liu and collaborators, of Finn Arup Nielsen, and of Tim Loughran and Bill Loughran. NRC lexicon is used for this work. As following code shows, initial data processing for word cloud, bar plot and time series is similar to the processing used to produce word cloud in the previous section. Data processing includes removal of retweets, tokenization and stop words removal. The processed data is then joined with the sentiments dataset, which facilitates labeling of words by positive/negative sentiment, followed by eventual plotting as a comparison cloud (see sentimentWordCloud code chunk for further information about data processing and visualization).  </p>
+<div class="highlight"><pre><span></span><span class="c1">## server</span>
+userSentimentData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showWordBarSentiment<span class="p">,</span> <span class="p">{</span>
+  tweets <span class="o">&lt;-</span> userTimeline<span class="p">(</span>input<span class="o">$</span>twitterUser8<span class="p">,</span> n <span class="o">=</span> input<span class="o">$</span>tweetNum8<span class="p">)</span>
+  incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting topic tweets&quot;</span><span class="p">)</span>
+  tab <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+  tab3 <span class="o">&lt;-</span> <span class="kp">unique</span><span class="p">(</span>tab<span class="p">)</span>
+  reg <span class="o">&lt;-</span> <span class="s">&quot;([^A-Za-z_\\d#@&#39;]|&#39;(?![A-Za-z_\\d#@]))&quot;</span>
+  tab4 <span class="o">&lt;-</span> tab3 <span class="o">%&gt;%</span>
+    dplyr<span class="o">::</span>filter<span class="p">(</span><span class="o">!</span>str_detect<span class="p">(</span>text<span class="p">,</span> <span class="s">&quot;^RT&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+    dplyr<span class="o">::</span>mutate<span class="p">(</span>text2 <span class="o">=</span> str_replace_all<span class="p">(</span>text<span class="p">,</span> <span class="s">&quot;https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;amp;|&amp;lt;|&amp;gt;|RT|https&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+  tab4 <span class="o">&lt;-</span> tab4 <span class="o">%&gt;%</span>
+    unnest_tokens<span class="p">(</span>word<span class="p">,</span> text2<span class="p">,</span> token <span class="o">=</span> <span class="s">&quot;regex&quot;</span><span class="p">,</span> pattern <span class="o">=</span> reg<span class="p">)</span> <span class="o">%&gt;%</span>
+    dplyr<span class="o">::</span>filter<span class="p">(</span><span class="o">!</span>word <span class="o">%in%</span> stop_words<span class="o">$</span>word<span class="p">,</span> str_detect<span class="p">(</span>word<span class="p">,</span> <span class="s">&quot;[a-z]&quot;</span><span class="p">))</span>
+  tab4<span class="o">$</span>date <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>tab4<span class="o">$</span>created<span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>tab4<span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">## Building sentiment word cloud</span>
+output<span class="o">$</span>sentimentWordCloud <span class="o">&lt;-</span> renderPlot<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    join7 <span class="o">&lt;-</span> userSentimentData<span class="p">()</span>
+    wordTab <span class="o">&lt;-</span> join7 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>word<span class="p">)</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>summarise<span class="p">(</span>n <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>arrange<span class="p">(</span>desc<span class="p">(</span>n<span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.6</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Building word cloud&quot;</span><span class="p">)</span>
+    join1 <span class="o">&lt;-</span> inner_join<span class="p">(</span>wordTab<span class="p">,</span> sentiments<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;word&quot;</span> <span class="o">=</span> <span class="s">&quot;word&quot;</span><span class="p">))</span>
+    join2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>join1<span class="p">,</span> lexicon <span class="o">==</span> <span class="s">&quot;nrc&quot;</span><span class="p">)</span>
+    join3 <span class="o">&lt;-</span> dplyr<span class="o">::</span>filter<span class="p">(</span>join2<span class="p">,</span> sentiment <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;positive&quot;</span><span class="p">,</span> <span class="s">&quot;negative&quot;</span><span class="p">))</span>
+    join4 <span class="o">&lt;-</span> join3 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>mutate<span class="p">(</span>score <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>sentiment <span class="o">==</span> <span class="s">&quot;negative&quot;</span><span class="p">,</span> <span class="m">-1</span> <span class="o">*</span> n<span class="p">,</span> n<span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.4</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    join4 <span class="o">%&gt;%</span>
+      dplyr<span class="o">::</span>arrange<span class="p">(</span>desc<span class="p">(</span>n<span class="p">))</span> <span class="o">%&gt;%</span>
+      acast<span class="p">(</span>word <span class="o">~</span> sentiment<span class="p">,</span> value.var <span class="o">=</span> <span class="s">&quot;n&quot;</span><span class="p">,</span> fill <span class="o">=</span> <span class="m">0</span><span class="p">)</span> <span class="o">%&gt;%</span>
+      comparison.cloud<span class="p">(</span>
+        colors <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;#F8766D&quot;</span><span class="p">,</span> <span class="s">&quot;#00BFC4&quot;</span><span class="p">),</span>
+        max.words <span class="o">=</span> input<span class="o">$</span>wordCloudNum
+      <span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Image below shows a word cloud sentiment analysis of my favorite tweets. <img alt="&quot;image&quot;" height="500px" src="images/sentiment-word.png" width="860px"></p>
+<h4>Sentiment Bar Plot</h4>
+<p>Sentiment bar plot is produced in a similar fashion as the sentiment word cloud and aims to provide a different method of visualizing the same sentiment data.</p>
+<div class="highlight"><pre><span></span><span class="c1">## Preparing data for sentiment time series</span>
+ <span class="c1">## Building sentiment bar plot</span>
+output<span class="o">$</span>sentimentBarPlot <span class="o">&lt;-</span> renderPlot<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    join7 <span class="o">&lt;-</span> userSentimentData<span class="p">()</span>
+    wordTab <span class="o">&lt;-</span> join7 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>word<span class="p">)</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>summarise<span class="p">(</span>n <span class="o">=</span> n<span class="p">())</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>arrange<span class="p">(</span>desc<span class="p">(</span>n<span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.6</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Building bar plot&quot;</span><span class="p">)</span>
+    join1 <span class="o">&lt;-</span> inner_join<span class="p">(</span>wordTab<span class="p">,</span> sentiments<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;word&quot;</span> <span class="o">=</span> <span class="s">&quot;word&quot;</span><span class="p">))</span>
+    join2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>join1<span class="p">,</span> lexicon <span class="o">==</span> <span class="s">&quot;nrc&quot;</span><span class="p">)</span>
+    join3 <span class="o">&lt;-</span> dplyr<span class="o">::</span>filter<span class="p">(</span>join2<span class="p">,</span> sentiment <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;positive&quot;</span><span class="p">,</span> <span class="s">&quot;negative&quot;</span><span class="p">))</span>
+    join4 <span class="o">&lt;-</span> join3 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>mutate<span class="p">(</span>score <span class="o">=</span> <span class="kp">ifelse</span><span class="p">(</span>sentiment <span class="o">==</span> <span class="s">&quot;negative&quot;</span><span class="p">,</span> <span class="m">-1</span> <span class="o">*</span> n<span class="p">,</span> n<span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.4</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    join4 <span class="o">%&gt;%</span>
+      dplyr<span class="o">::</span>arrange<span class="p">(</span>desc<span class="p">(</span>score<span class="p">))</span> <span class="o">%&gt;%</span>
+      dplyr<span class="o">::</span>group_by<span class="p">(</span>sentiment<span class="p">)</span> <span class="o">%&gt;%</span>
+      top_n<span class="p">(</span>n <span class="o">=</span> input<span class="o">$</span>barplotNum<span class="p">,</span> <span class="kp">abs</span><span class="p">(</span>score<span class="p">))</span> <span class="o">%&gt;%</span>
+      dplyr<span class="o">::</span>mutate<span class="p">(</span>word <span class="o">=</span> reorder<span class="p">(</span>word<span class="p">,</span> score<span class="p">))</span> <span class="o">%&gt;%</span>
+      ggplot<span class="p">(</span>aes<span class="p">(</span>x <span class="o">=</span> reorder<span class="p">(</span>word<span class="p">,</span> <span class="o">-</span>score<span class="p">),</span> score<span class="p">,</span> fill <span class="o">=</span> score <span class="o">&gt;</span> <span class="m">0</span><span class="p">))</span> <span class="o">+</span>
+      geom_bar<span class="p">(</span>stat <span class="o">=</span> <span class="s">&quot;identity&quot;</span><span class="p">,</span> show.legend <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span> <span class="o">+</span>
+      coord_flip<span class="p">()</span> <span class="o">+</span> theme_bw<span class="p">()</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Image below shows a bar plot sentiment analysis of my favorite tweets. <img alt="&quot;image&quot;" height="500px" src="images/sentiment-bar.png" width="860px"></p>
+<h4>Sentiment Time Series</h4>
+<p>Lastly, time series plot is used to visualize sentiment data over time using ggplot. An interesting and valuable feature of the time series plot is that an app user can retrieve the tweets associated with a positive/negative sentiment for a specified date. This retrieval is made possible by defining a click argument (plot1_click) in plotOutput. Plot1_click is then passed as an argument to the <em>nearPoints</em> function from the <em>shiny</em> package, which returns observations (tweets) near the clicked point, associated with the nearest date and sentiment.</p>
+<div class="highlight"><pre><span></span><span class="c1">## Building sentiment time series</span>
+output<span class="o">$</span>sentimentTimeSeries <span class="o">&lt;-</span> renderPlot<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    join7 <span class="o">&lt;-</span> userSentimentData<span class="p">()</span>
+    incProgress<span class="p">(</span><span class="m">0.6</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Constructing time series&quot;</span><span class="p">)</span>
+    join1 <span class="o">&lt;-</span> inner_join<span class="p">(</span>join7<span class="p">,</span> sentiments<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;word&quot;</span> <span class="o">=</span> <span class="s">&quot;word&quot;</span><span class="p">))</span>
+    join2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>join1<span class="p">,</span> lexicon <span class="o">==</span> <span class="s">&quot;nrc&quot;</span><span class="p">)</span>
+    join3 <span class="o">&lt;-</span> dplyr<span class="o">::</span>filter<span class="p">(</span>join2<span class="p">,</span> sentiment <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;positive&quot;</span><span class="p">,</span> <span class="s">&quot;negative&quot;</span><span class="p">))</span>
+    join4 <span class="o">&lt;-</span> join3 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>word<span class="p">,</span> sentiment<span class="p">,</span> <span class="kp">date</span><span class="p">,</span> text<span class="p">)</span>
+    join4<span class="o">$</span>word <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>join4<span class="o">$</span>word<span class="p">)</span>
+    join4<span class="o">$</span>sentiment <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>join4<span class="o">$</span>sentiment<span class="p">)</span>
+    join5 <span class="o">&lt;-</span> join4 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>sentiment<span class="p">,</span> <span class="kp">date</span><span class="p">)</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>summarise<span class="p">(</span>word <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>text<span class="p">,</span> collapse <span class="o">=</span> <span class="s">&quot;a`&quot;</span><span class="p">),</span> n <span class="o">=</span> n<span class="p">())</span>
+    join5<span class="o">$</span>n <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>join5<span class="o">$</span>n<span class="p">)</span>
+    <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>join5<span class="p">))</span>
+    <span class="p">{</span>
+      join5<span class="o">$</span>word<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="kp">unique</span><span class="p">((</span><span class="kp">strsplit</span><span class="p">(</span>join5<span class="o">$</span>word<span class="p">[</span>i<span class="p">],</span> <span class="s">&quot;\n&quot;</span><span class="p">))[[</span><span class="m">1</span><span class="p">]]),</span> collapse <span class="o">=</span> <span class="s">&quot;\n&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    incProgress<span class="p">(</span><span class="m">0.2</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    join5 <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>join5<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;n&quot;</span> <span class="o">=</span> <span class="s">&quot;Tweets&quot;</span><span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.2</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Plotting...&quot;</span><span class="p">)</span>
+    p <span class="o">&lt;-</span> ggplot<span class="p">(</span>data <span class="o">=</span> join5<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> <span class="kp">date</span><span class="p">,</span> y <span class="o">=</span> Tweets<span class="p">))</span> <span class="o">+</span> geom_line<span class="p">(</span>aes<span class="p">(</span>colour <span class="o">=</span> sentiment<span class="p">))</span> <span class="o">+</span>
+      geom_point<span class="p">(</span>alpha <span class="o">=</span> <span class="m">0.6</span><span class="p">,</span> size <span class="o">=</span> <span class="m">1.5</span><span class="p">,</span> aes<span class="p">(</span>text <span class="o">=</span> word<span class="p">))</span> <span class="o">+</span> theme_bw<span class="p">()</span>
+    p <span class="o">+</span> <span class="p">(</span>scale_x_date<span class="p">(</span>labels <span class="o">=</span> date_format<span class="p">(</span><span class="s">&quot;%b %y&quot;</span><span class="p">)))</span>
+    p
+  <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="c1">## Preparing to show point/sentiment specific tweets</span>
+output<span class="o">$</span>sentimentInfo <span class="o">&lt;-</span> renderDataTable<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    join7 <span class="o">&lt;-</span> userSentimentData<span class="p">()</span>
+    incProgress<span class="p">(</span><span class="m">0.4</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Constructing time series&quot;</span><span class="p">)</span>
+    join1 <span class="o">&lt;-</span> inner_join<span class="p">(</span>join7<span class="p">,</span> sentiments<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;word&quot;</span> <span class="o">=</span> <span class="s">&quot;word&quot;</span><span class="p">))</span>
+    join2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>join1<span class="p">,</span> lexicon <span class="o">==</span> <span class="s">&quot;nrc&quot;</span><span class="p">)</span>
+    join3 <span class="o">&lt;-</span> dplyr<span class="o">::</span>filter<span class="p">(</span>join2<span class="p">,</span> sentiment <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;positive&quot;</span><span class="p">,</span> <span class="s">&quot;negative&quot;</span><span class="p">))</span>
+    join4 <span class="o">&lt;-</span> join3 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>word<span class="p">,</span> sentiment<span class="p">,</span> <span class="kp">date</span><span class="p">,</span> text<span class="p">)</span>
+    join4<span class="o">$</span>word <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>join4<span class="o">$</span>word<span class="p">)</span>
+    join4<span class="o">$</span>sentiment <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>join4<span class="o">$</span>sentiment<span class="p">)</span>
+    join5 <span class="o">&lt;-</span> join4 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>group_by<span class="p">(</span>sentiment<span class="p">,</span> <span class="kp">date</span><span class="p">)</span> <span class="o">%&gt;%</span> dplyr<span class="o">::</span>summarise<span class="p">(</span>word <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>text<span class="p">,</span> collapse <span class="o">=</span> <span class="s">&quot;a`&quot;</span><span class="p">),</span> n <span class="o">=</span> n<span class="p">())</span>
+    join5<span class="o">$</span>n <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span>join5<span class="o">$</span>n<span class="p">)</span>
+    <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>join5<span class="p">))</span>
+    <span class="p">{</span>
+      join5<span class="o">$</span>word<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="kp">unique</span><span class="p">((</span><span class="kp">strsplit</span><span class="p">(</span>join5<span class="o">$</span>word<span class="p">[</span>i<span class="p">],</span> <span class="s">&quot;\n&quot;</span><span class="p">))[[</span><span class="m">1</span><span class="p">]]),</span> collapse <span class="o">=</span> <span class="s">&quot;\n&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Processing...&quot;</span><span class="p">)</span>
+    join5 <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>join5<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;n&quot;</span> <span class="o">=</span> <span class="s">&quot;Tweets&quot;</span><span class="p">))</span>
+    <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>input<span class="o">$</span>plot1_click<span class="p">)</span> <span class="o">==</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="p">{</span>
+      dat <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;Click a point to see relevant tweets by sentiment&quot;</span><span class="p">)</span>
+      <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="s">&quot;Click a point to see relevant tweets by sentiment&quot;</span>
+      dat<span class="p">[,</span> <span class="m">1</span><span class="p">]</span> <span class="o">&lt;-</span> <span class="s">&quot;&quot;</span>
+      <span class="kr">return</span><span class="p">(</span>dat<span class="p">)</span>
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="p">{</span>
+      dat <span class="o">&lt;-</span> nearPoints<span class="p">(</span>join5<span class="p">,</span> input<span class="o">$</span>plot1_click<span class="p">,</span> addDist <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+      dat1 <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>dat<span class="p">)</span>
+      dat2 <span class="o">&lt;-</span> dat1 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>sentiment<span class="p">,</span> <span class="kp">date</span><span class="p">,</span> word<span class="p">)</span>
+      dat4 <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>dat2<span class="p">)</span> <span class="o">%&gt;%</span> mutate<span class="p">(</span>V3 <span class="o">=</span> <span class="kp">strsplit</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>word<span class="p">),</span> <span class="s">&quot;a`&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span> unnest<span class="p">(</span>V3<span class="p">)</span>
+      dat5 <span class="o">&lt;-</span> dat4 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>sentiment<span class="p">,</span> <span class="kp">date</span><span class="p">,</span> V3<span class="p">)</span>
+      incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+      dat5 <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>dat5<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;V3&quot;</span> <span class="o">=</span> <span class="s">&quot;tweets&quot;</span><span class="p">))</span>
+      <span class="kr">return</span><span class="p">(</span><span class="kp">unique</span><span class="p">(</span>dat5<span class="p">))</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Image below shows a time series sentiment analysis of my favorite tweets. <img alt="&quot;image&quot;" height="500px" src="images/sentiment-time.png" width="860px"></p>
+<h3>Geographic Analysis</h3>
+<h4>Mapping Trends</h4>
+<p>Next feature of this application, Mapping Trends, facilitates geographic specific trend analysis. Trend analysis is performed at a global level since multilingual tweets are translated to English using the Google Translation API. Trends per location are captured using the app user's click via the map_click input. From the map_click, latitude and longitude are extracted and passed as parameters to the <em>revgeocode</em> function, from the <em>ggmap</em> package, which geocodes a longitude/latitude location using Google Maps. Latitude and longitude coordinates are then passed in to the <em>closestTrendLocation</em> function from the <em>twitteR</em> package to retrieve the woeid, which is a 32-bit reference identifier assigned by Yahoo! that identifies features on Earth. The woeid is then passed into the <em>getTrends</em> function which returns the trends associated with that woeid. All trends are collected and translated in English using the <em>translate</em> function from the <em>translate</em> package. Tweet translation is performed in English from the original language, which is detected using the <em>detect.source</em> function from the <em>translate</em> package.</p>
+<div class="highlight"><pre><span></span>leafletOutput<span class="p">(</span><span class="s">&quot;map&quot;</span><span class="p">)</span>
+
+<span class="c1">#trend analysis</span>
+trendsData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>map_click<span class="p">,</span> <span class="p">{</span>
+  address <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span>revgeocode<span class="p">(</span><span class="kt">c</span><span class="p">(</span>click<span class="o">$</span>lng<span class="p">,</span> click<span class="o">$</span>lat<span class="p">)))</span>
+  click <span class="o">&lt;-</span> input<span class="o">$</span>map_click
+  clng <span class="o">&lt;-</span> click<span class="o">$</span>lng
+  clat <span class="o">&lt;-</span> click<span class="o">$</span>lat
+  leafletProxy<span class="p">(</span><span class="s">&quot;map&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+    addCircles<span class="p">(</span>
+      lng <span class="o">=</span> clng<span class="p">,</span> lat <span class="o">=</span> clat<span class="p">,</span> group <span class="o">=</span> <span class="s">&quot;circles&quot;</span><span class="p">,</span>
+      weight <span class="o">=</span> <span class="m">20</span><span class="p">,</span> radius <span class="o">=</span> <span class="m">100</span><span class="p">,</span> color <span class="o">=</span> <span class="s">&quot;#0033FF&quot;</span><span class="p">,</span>
+      popup <span class="o">=</span> address<span class="p">,</span> fillOpacity <span class="o">=</span> <span class="m">0.5</span><span class="p">,</span> opacity <span class="o">=</span> <span class="m">1</span>
+    <span class="p">)</span>
+
+  addressClick <span class="o">&lt;-</span> click
+
+  progress4 <span class="o">&lt;-</span> shiny<span class="o">::</span>Progress<span class="o">$</span>new<span class="p">()</span>
+  <span class="kp">on.exit</span><span class="p">(</span>progress4<span class="o">$</span><span class="kp">close</span><span class="p">())</span>
+  progress4<span class="o">$</span>set<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Calculating trends&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+
+  clat <span class="o">&lt;-</span> addressClick<span class="o">$</span>lat
+  clng <span class="o">&lt;-</span> addressClick<span class="o">$</span>lng
+  obs <span class="o">&lt;-</span> closestTrendLocations<span class="p">(</span>clat<span class="p">,</span> clng<span class="p">)</span>
+  woe <span class="o">&lt;-</span> obs<span class="p">[</span><span class="s">&quot;woeid&quot;</span><span class="p">]</span><span class="o">$</span>woeid
+  trends <span class="o">&lt;-</span> getTrends<span class="p">(</span>woe<span class="p">)</span>
+  trend <span class="o">&lt;-</span> trends<span class="o">$</span>name
+
+  empt <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">()</span>
+  <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>trends<span class="p">))</span>
+  <span class="p">{</span>
+    trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;([[:upper:]])&quot;</span><span class="p">,</span> <span class="s">&quot; \\1&quot;</span><span class="p">,</span> trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">])</span>
+    trans <span class="o">&lt;-</span> translate<span class="p">(</span>trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">],</span> detect.source<span class="p">(</span>trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">])[[</span><span class="m">1</span><span class="p">]],</span> <span class="s">&quot;en&quot;</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="p">(</span><span class="kp">length</span><span class="p">(</span>trans<span class="p">)</span> <span class="o">==</span> <span class="m">0</span><span class="p">)</span> <span class="p">{</span>
+      trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> str_replace<span class="p">(</span><span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;\\s+&quot;</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="p">,</span> str_trim<span class="p">(</span>trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">])),</span> <span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">)</span>
+      trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">])</span>
+      empt <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>empt<span class="p">,</span> trends<span class="o">$</span>name<span class="p">[</span>i<span class="p">])</span>
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="p">{</span>
+      trans <span class="o">&lt;-</span> str_replace<span class="p">(</span><span class="kp">gsub</span><span class="p">(</span><span class="s">&quot;\\s+&quot;</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="p">,</span> str_trim<span class="p">(</span>trans<span class="p">)),</span> <span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">)</span>
+      trans <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> trans<span class="p">)</span>
+      empt <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>empt<span class="p">,</span> trans<span class="p">)</span>
+    <span class="p">}</span>
+    progress4<span class="o">$</span>inc<span class="p">(</span><span class="m">1</span> <span class="o">/</span> i<span class="p">,</span> detail <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Calculating trend&quot;</span><span class="p">,</span> i<span class="p">))</span>
+  <span class="p">}</span>
+
+  empt2 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>empt<span class="p">)</span>
+  total <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>trend<span class="p">,</span> empt2<span class="p">)</span>
+  total <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>total<span class="p">,</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;empt&quot;</span> <span class="o">=</span> <span class="s">&quot;translation&quot;</span><span class="p">))</span>
+
+  clat <span class="o">&lt;-</span> addressClick<span class="o">$</span>lat
+  clng <span class="o">&lt;-</span> addressClick<span class="o">$</span>lng
+  latitude <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Latitude:&quot;</span><span class="p">,</span> <span class="kp">round</span><span class="p">(</span>clat<span class="p">,</span> <span class="m">3</span><span class="p">),</span> <span class="s">&quot;Longitude:&quot;</span><span class="p">,</span> <span class="kp">round</span><span class="p">(</span>clng<span class="p">,</span> <span class="m">3</span><span class="p">))</span>
+
+  address <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span>revgeocode<span class="p">(</span><span class="kt">c</span><span class="p">(</span>clng<span class="p">,</span> clat<span class="p">)))</span>
+  address1 <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Address:&quot;</span><span class="p">,</span> address<span class="p">)</span>
+
+  total2 <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>total<span class="p">,</span> latitude<span class="p">)</span>
+  total3 <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>total2<span class="p">,</span> address1<span class="p">)</span>
+  total3<span class="o">$</span>translation <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>total3<span class="o">$</span>translation<span class="p">))</span>
+  total3<span class="o">$</span>trend <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>total3<span class="o">$</span>trend<span class="p">))</span>
+  <span class="kr">return</span><span class="p">(</span>total3<span class="p">)</span>
+<span class="p">})</span>
+
+output<span class="o">$</span>map <span class="o">&lt;-</span> renderLeaflet<span class="p">({</span>
+  leaflet<span class="p">()</span> <span class="o">%&gt;%</span>
+    setView<span class="p">(</span>lng <span class="o">=</span> <span class="m">-73.9442</span><span class="p">,</span> lat <span class="o">=</span> <span class="m">40.6782</span><span class="p">,</span> zoom <span class="o">=</span> <span class="m">8</span><span class="p">)</span> <span class="o">%&gt;%</span>
+    addTiles<span class="p">(</span>options <span class="o">=</span> providerTileOptions<span class="p">(</span>noWrap <span class="o">=</span> <span class="kc">TRUE</span><span class="p">))</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Tweets related to a trend are next captured, translated and displayed in a table.</p>
+<div class="highlight"><pre><span></span><span class="c1">### Retrieve 10 tweets for the specified trend</span>
+mapTrendsTweet <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showTrends<span class="p">,</span> <span class="p">{</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    tweets <span class="o">&lt;-</span> searchTwitter<span class="p">(</span>input<span class="o">$</span>showTweetTrend<span class="p">,</span> n <span class="o">=</span> <span class="m">10</span><span class="p">)</span>
+    incProgress<span class="p">(</span><span class="m">0.6</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting tweets&quot;</span><span class="p">)</span>
+    tab <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+    text <span class="o">&lt;-</span> <span class="kp">unique</span><span class="p">(</span>tab<span class="o">$</span>text<span class="p">)</span>
+    incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Translating tweets&quot;</span><span class="p">)</span>
+    transl <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">()</span>
+    <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>text<span class="p">))</span>
+    <span class="p">{</span>
+      trans <span class="o">&lt;-</span> <span class="p">(</span>translate<span class="p">(</span>text<span class="p">[</span>i<span class="p">],</span> detect.source<span class="p">(</span>text<span class="p">[</span>i<span class="p">])[[</span><span class="m">1</span><span class="p">]],</span> <span class="s">&quot;en&quot;</span><span class="p">))</span>
+      <span class="kr">if</span> <span class="p">(</span><span class="kp">length</span><span class="p">(</span>trans<span class="p">)</span> <span class="o">==</span> <span class="m">0</span><span class="p">)</span> <span class="p">{</span>
+        transl <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>transl<span class="p">,</span> text<span class="p">[</span>i<span class="p">])</span>
+      <span class="p">}</span>
+      <span class="kr">else</span> <span class="p">{</span>
+        transl <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>transl<span class="p">,</span> trans<span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    transl <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>transl<span class="p">)</span>
+    trendData <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>text<span class="p">,</span> transl<span class="p">)</span>
+    trendData <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>trendData<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;text&quot;</span> <span class="o">=</span> <span class="s">&quot;Tweet&quot;</span><span class="p">))</span>
+    trendData <span class="o">&lt;-</span> plyr<span class="o">::</span>rename<span class="p">(</span>trendData<span class="p">,</span> replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;transl&quot;</span> <span class="o">=</span> <span class="s">&quot;Translated&quot;</span><span class="p">))</span>
+    incProgress<span class="p">(</span><span class="m">0.1</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    <span class="kr">return</span><span class="p">(</span>trendData<span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+
+output<span class="o">$</span>tweetTable <span class="o">&lt;-</span> renderDataTable<span class="p">({</span>
+  <span class="kr">return</span><span class="p">(</span>mapTrendsTweet<span class="p">())</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Following image shows trends in East Hartford, Connecticut on April 14, 2018 like #MarchForScience. <img alt="&quot;image&quot;" height="500px" src="images/mapping_trends.png" width="860px"></p>
+<h4>Mapping Followers/Following</h4>
+<p>Next geographic analysis is performed to map user followers and following with public geolocation data. As following code shows, user's followers are retrieved using <code>user$getFriends</code>. Followers' location attribute is then extracted and plotted via leaflet. User click can be used to show publicly available information about that follower, including his/her screen name, description, location, friend, status and favorites count and account creation date. In addition, ten tweets of that follower are shown in a table.</p>
+<div class="highlight"><pre><span></span><span class="c1">## Mapping Following</span>
+<span class="c1">### Retrieve location data for the specified user&#39;s following</span>
+datasetFollow1 <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showFollowingMap<span class="p">,</span> <span class="p">{</span>
+  user <span class="o">&lt;-</span> getUser<span class="p">(</span>input<span class="o">$</span>twitterUser10<span class="p">)</span>
+  follower <span class="o">&lt;-</span> user<span class="o">$</span>getFriends<span class="p">(</span>n <span class="o">=</span> input<span class="o">$</span>tweetNum10<span class="p">)</span>
+  progress22 <span class="o">&lt;-</span> shiny<span class="o">::</span>Progress<span class="o">$</span>new<span class="p">()</span>
+  <span class="kp">on.exit</span><span class="p">(</span>progress22<span class="o">$</span><span class="kp">close</span><span class="p">())</span>
+  progress22<span class="o">$</span>set<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Calculating following data&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+
+  datFrame <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">()</span>
+  datFrame <span class="o">&lt;-</span> twListToDF<span class="p">(</span>follower<span class="p">)</span>
+  datFrame <span class="o">&lt;-</span> datFrame <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>screenName<span class="p">,</span> location<span class="p">)</span>
+  empt <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>datFrame<span class="p">,</span> location <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+  empt<span class="o">$</span>location <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>empt<span class="o">$</span>location<span class="p">)</span>
+
+  lon <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;double&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>empt<span class="p">))</span>
+  lat <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;double&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>empt<span class="p">))</span>
+  <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>empt<span class="p">))</span>
+  <span class="p">{</span>
+    lon<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span>geocode<span class="p">(</span>empt<span class="o">$</span>location<span class="p">[</span>i<span class="p">])</span><span class="o">$</span>lon<span class="p">)</span>
+    lat<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span>geocode<span class="p">(</span>empt<span class="o">$</span>location<span class="p">[</span>i<span class="p">])</span><span class="o">$</span>lat<span class="p">)</span>
+    progress22<span class="o">$</span>inc<span class="p">(</span><span class="m">1</span> <span class="o">/</span> <span class="kp">nrow</span><span class="p">(</span>empt<span class="p">),</span> detail <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Data for following&quot;</span><span class="p">,</span> i<span class="p">))</span>
+  <span class="p">}</span>
+  ll.visited <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span><span class="kp">cbind</span><span class="p">(</span>lon<span class="p">,</span> lat<span class="p">))</span>
+  Tab2 <span class="o">&lt;-</span> ll.visited
+  Tab3 <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>Tab2<span class="p">,</span> empt<span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>Tab3<span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">### Map the following of the specified user</span>
+output<span class="o">$</span>mapFollowing <span class="o">&lt;-</span> renderLeaflet<span class="p">({</span>
+  Tab2 <span class="o">&lt;-</span> datasetFollow1<span class="p">()</span>
+  Tab2 <span class="o">&lt;-</span> na.omit<span class="p">(</span>Tab2<span class="p">)</span>
+  visit.x <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>Tab2<span class="o">$</span>lon<span class="p">))</span>
+  visit.y <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>Tab2<span class="o">$</span>lat<span class="p">))</span>
+  map2 <span class="o">&lt;-</span> leaflet<span class="p">()</span> <span class="o">%&gt;%</span>
+    addTiles<span class="p">(</span>options <span class="o">=</span> providerTileOptions<span class="p">(</span>noWrap <span class="o">=</span> <span class="kc">TRUE</span><span class="p">))</span> <span class="o">%&gt;%</span>
+    addCircleMarkers<span class="p">(</span>
+      lng <span class="o">=</span> visit.x<span class="p">,</span> lat <span class="o">=</span> visit.y<span class="p">,</span> group <span class="o">=</span> <span class="s">&quot;circles&quot;</span><span class="p">,</span>
+      weight <span class="o">=</span> <span class="m">6</span><span class="p">,</span> radius <span class="o">=</span> <span class="m">4</span><span class="p">,</span> color <span class="o">=</span> <span class="s">&quot;#00aced&quot;</span><span class="p">,</span>
+      opacity <span class="o">=</span> <span class="m">1</span>
+    <span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>map2<span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">### Retrieve user attribute information for the chosen following</span>
+observeEvent<span class="p">(</span>input<span class="o">$</span>mapFollowing_marker_click<span class="p">,</span> <span class="p">{</span>
+  loc2 <span class="o">&lt;-</span> datasetFollow1<span class="p">()</span>
+  loc2 <span class="o">&lt;-</span> na.omit<span class="p">(</span>loc2<span class="p">)</span>
+  p <span class="o">&lt;-</span> input<span class="o">$</span>mapFollowing_marker_click
+  lat1 <span class="o">&lt;-</span> p<span class="o">$</span>lat
+  lon1 <span class="o">&lt;-</span> p<span class="o">$</span>lng
+  loc2<span class="o">$</span>lon2 <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>loc2<span class="o">$</span>lon<span class="p">)</span>
+  loc2<span class="o">$</span>lat2 <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>loc2<span class="o">$</span>lat<span class="p">)</span>
+  datsmall <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>loc2<span class="p">,</span> lat2 <span class="o">==</span> lat1 <span class="o">&amp;</span> lon2 <span class="o">==</span> lon1<span class="p">)</span>
+  datsmall <span class="o">&lt;-</span> datsmall<span class="p">[,</span> <span class="o">!</span><span class="p">(</span><span class="kp">colnames</span><span class="p">(</span>datsmall<span class="p">)</span> <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lon2&quot;</span><span class="p">,</span> <span class="s">&quot;lat2&quot;</span><span class="p">))]</span>
+  Name <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  Description <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  FavoritesCount <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;double&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  FriendsCount <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;double&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  StatusCount <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;double&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  AccountCreated <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  ScreenName <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  Location <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">nrow</span><span class="p">(</span>datsmall<span class="p">))</span>
+  <span class="p">{</span>
+    user <span class="o">&lt;-</span> getUser<span class="p">(</span>datsmall<span class="o">$</span>screenName<span class="p">[</span>i<span class="p">])</span>
+    Name<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> user<span class="o">$</span>name
+    Description<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> user<span class="o">$</span>description
+    FavoritesCount<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> user<span class="o">$</span>favoritesCount
+    FriendsCount<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> user<span class="o">$</span>friendsCount
+    StatusCount<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> user<span class="o">$</span>statusesCount
+    AccountCreated<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span><span class="kp">try</span><span class="p">(</span><span class="kp">date</span><span class="p">(</span>user<span class="o">$</span>created<span class="p">)))</span>
+    ScreenName<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> datsmall<span class="o">$</span>screenName<span class="p">[</span>i<span class="p">]</span>
+    Location<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> datsmall<span class="o">$</span>location<span class="p">[</span>i<span class="p">]</span>
+  <span class="p">}</span>
+  userdes <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="kp">cbind</span><span class="p">(</span>
+    ScreenName<span class="p">,</span> Name<span class="p">,</span> Description<span class="p">,</span> Location<span class="p">,</span>
+    FriendsCount<span class="p">,</span> StatusCount<span class="p">,</span> FavoritesCount<span class="p">,</span>
+    AccountCreated
+  <span class="p">))</span>
+  output<span class="o">$</span>followingDescription <span class="o">&lt;-</span> renderDataTable<span class="p">({</span>
+    <span class="kr">return</span><span class="p">(</span>userdes<span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Following image maps 25 of rstudio's following. Point click shows users like rstudiosupport and associated tweets. <img alt="&quot;image&quot;" height="500px" src="images/mapping_following.png" width="860px"></p>
+<h4>Mapping Tweets</h4>
+<p>This feature facilitates a global visualization of location enabled tweets for a specific topic. Since the vertices can be colored by hour or weekday status, global trend/movement of tweets about a particular topic can be assessed over time. As code shows below, location information for tweets is extracted and plotted using leaflet. Circle markers can be clicked to obtain location, tweet text, time of day, retweet, favorites, statuses, followers and friends count information.</p>
+<div class="highlight"><pre><span></span><span class="c1">### Retrieve mapped tweets data</span>
+mapTweetsData <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>showMapTweets<span class="p">,</span> <span class="p">{</span>
+  tweets <span class="o">&lt;-</span> searchTwitter<span class="p">(</span>input<span class="o">$</span>twitterUser12<span class="p">,</span> n <span class="o">=</span> <span class="m">500</span><span class="p">)</span>
+  tweetFrame <span class="o">&lt;-</span> twListToDF<span class="p">(</span>tweets<span class="p">)</span>
+
+  userInfo <span class="o">&lt;-</span> lookupUsers<span class="p">(</span>tweetFrame<span class="o">$</span>screenName<span class="p">)</span>
+  userFrame <span class="o">&lt;-</span> twListToDF<span class="p">(</span>userInfo<span class="p">)</span>
+
+  full <span class="o">&lt;-</span> inner_join<span class="p">(</span>tweetFrame<span class="p">,</span> userFrame<span class="p">,</span> by <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;screenName&quot;</span> <span class="o">=</span> <span class="s">&quot;screenName&quot;</span><span class="p">))</span>
+  full<span class="o">$</span>location <span class="o">&lt;-</span> <span class="kp">iconv</span><span class="p">(</span>full<span class="o">$</span>location<span class="p">,</span> to <span class="o">=</span> <span class="s">&quot;ASCII&quot;</span><span class="p">,</span> sub <span class="o">=</span> <span class="kc">NA</span><span class="p">)</span>
+  full2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>full<span class="p">,</span> location <span class="o">!=</span> <span class="s">&quot;NA&quot;</span> <span class="o">&amp;</span> location <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+  userFrame <span class="o">&lt;-</span> full2
+  user2 <span class="o">&lt;-</span> <span class="kp">sample</span><span class="p">(</span>userFrame<span class="p">,</span> input<span class="o">$</span>tweetNum12<span class="p">)</span>
+  user2<span class="o">$</span>date <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>user2<span class="o">$</span>created.x<span class="p">)</span>
+  user2<span class="o">$</span>year <span class="o">&lt;-</span> year<span class="p">(</span>user2<span class="o">$</span><span class="kp">date</span><span class="p">)</span>
+  user2<span class="o">$</span>year <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>user2<span class="o">$</span>year<span class="p">)</span>
+  user2<span class="o">$</span>month <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">months</span><span class="p">(</span>user2<span class="o">$</span><span class="kp">date</span><span class="p">))</span>
+  user2<span class="o">$</span>weekday <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span><span class="kp">weekdays</span><span class="p">(</span>user2<span class="o">$</span><span class="kp">date</span><span class="p">))</span>
+  user2<span class="o">$</span>hour <span class="o">&lt;-</span> hour<span class="p">(</span>with_tz<span class="p">(</span>user2<span class="o">$</span>created.x<span class="p">,</span> <span class="s">&quot;EST&quot;</span><span class="p">))</span>
+
+  progress3 <span class="o">&lt;-</span> shiny<span class="o">::</span>Progress<span class="o">$</span>new<span class="p">()</span>
+  <span class="kp">on.exit</span><span class="p">(</span>progress3<span class="o">$</span><span class="kp">close</span><span class="p">())</span>
+  progress3<span class="o">$</span>set<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Calculating table&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+
+  loc <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">()</span>
+  amt <span class="o">&lt;-</span> <span class="kp">nrow</span><span class="p">(</span>user2<span class="p">)</span>
+  <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span>amt<span class="p">)</span>
+  <span class="p">{</span>
+    dat1 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="kp">try</span><span class="p">(</span>geocode<span class="p">(</span>user2<span class="p">[</span>i<span class="p">,</span> <span class="p">]</span><span class="o">$</span>location<span class="p">)))</span>
+    progress3<span class="o">$</span>inc<span class="p">(</span><span class="m">1</span> <span class="o">/</span> amt<span class="p">,</span> detail <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Data for user&quot;</span><span class="p">,</span> i<span class="p">))</span>
+    loc <span class="o">&lt;-</span> <span class="kp">rbind</span><span class="p">(</span>loc<span class="p">,</span> dat1<span class="p">)</span>
+  <span class="p">}</span>
+  loc<span class="o">$</span>location <span class="o">&lt;-</span> user2<span class="o">$</span>location
+  loc<span class="o">$</span>retweetCount <span class="o">&lt;-</span> user2<span class="o">$</span>retweetCount
+  loc<span class="o">$</span>year <span class="o">&lt;-</span> user2<span class="o">$</span>year
+  loc<span class="o">$</span>text <span class="o">&lt;-</span> user2<span class="o">$</span>text
+  loc<span class="o">$</span>weekday <span class="o">&lt;-</span> user2<span class="o">$</span>weekday
+  loc<span class="o">$</span>hour <span class="o">&lt;-</span> user2<span class="o">$</span>hour
+  loc<span class="o">$</span>month <span class="o">&lt;-</span> user2<span class="o">$</span>month
+  loc<span class="o">$</span>screenName <span class="o">&lt;-</span> user2<span class="o">$</span>screenName
+  loc<span class="o">$</span>favoritesCount <span class="o">&lt;-</span> user2<span class="o">$</span>favoritesCount
+  loc<span class="o">$</span>followersCount <span class="o">&lt;-</span> user2<span class="o">$</span>followersCount
+  loc<span class="o">$</span>friendsCount <span class="o">&lt;-</span> user2<span class="o">$</span>friendsCount
+  loc<span class="o">$</span>statusesCount <span class="o">&lt;-</span> user2<span class="o">$</span>statusesCount
+  loc2 <span class="o">&lt;-</span> <span class="kp">subset</span><span class="p">(</span>loc<span class="p">,</span> lon <span class="o">!=</span> <span class="s">&quot;NA&quot;</span> <span class="o">&amp;</span> lat <span class="o">!=</span> <span class="s">&quot;NA&quot;</span><span class="p">)</span>
+  incProgress<span class="p">(</span><span class="m">0.2</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+  loc3 <span class="o">&lt;-</span> loc2 <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>
+    lon<span class="p">,</span> lat<span class="p">,</span> location<span class="p">,</span> screenName<span class="p">,</span> text<span class="p">,</span> hour<span class="p">,</span> weekday<span class="p">,</span> month<span class="p">,</span> year<span class="p">,</span>
+    retweetCount<span class="p">,</span> favoritesCount<span class="p">,</span> statusesCount<span class="p">,</span> followersCount<span class="p">,</span> friendsCount
+  <span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>loc3<span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">### Plotting geolocated tweets and associated data</span>
+output<span class="o">$</span>mapTweets <span class="o">&lt;-</span> renderLeaflet<span class="p">({</span>
+  withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+    incProgress<span class="p">(</span><span class="m">0.8</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting tweets&quot;</span><span class="p">)</span>
+    loc2 <span class="o">&lt;-</span> mapTweetsData<span class="p">()</span>
+    var <span class="o">&lt;-</span> input<span class="o">$</span>circleColor
+    factpal <span class="o">&lt;-</span> colorFactor<span class="p">(</span><span class="s">&quot;viridis&quot;</span><span class="p">,</span> loc2<span class="p">[,</span> var<span class="p">])</span>
+    leaf <span class="o">&lt;-</span> leaflet<span class="p">()</span> <span class="o">%&gt;%</span>
+      addTiles<span class="p">(</span>options <span class="o">=</span> providerTileOptions<span class="p">(</span>noWrap <span class="o">=</span> <span class="kc">TRUE</span><span class="p">))</span> <span class="o">%&gt;%</span>
+      addCircleMarkers<span class="p">(</span>
+        lng <span class="o">=</span> loc2<span class="o">$</span>lon<span class="p">,</span> lat <span class="o">=</span> loc2<span class="o">$</span>lat<span class="p">,</span>
+        group <span class="o">=</span> <span class="s">&quot;circles&quot;</span><span class="p">,</span>
+        color <span class="o">=</span> <span class="kp">as.factor</span><span class="p">(</span>factpal<span class="p">(</span>loc2<span class="p">[,</span> var<span class="p">])),</span>
+        weight <span class="o">=</span> loc2<span class="p">[,</span> input<span class="o">$</span>circleCount<span class="p">]</span> <span class="o">*</span> input<span class="o">$</span>circleSize<span class="p">,</span>
+        fillColor <span class="o">=</span> <span class="s">&quot;black&quot;</span><span class="p">,</span> radius <span class="o">=</span> <span class="m">5</span>
+      <span class="p">)</span>
+    <span class="kr">if</span> <span class="p">(</span>var <span class="o">==</span> <span class="s">&quot;hour&quot;</span><span class="p">)</span> <span class="p">{</span>
+      leaf <span class="o">&lt;-</span> leaf <span class="o">%&gt;%</span> addLegend<span class="p">(</span>pal <span class="o">=</span> factpal<span class="p">,</span> values <span class="o">=</span> <span class="kp">as.factor</span><span class="p">(</span>loc2<span class="p">[,</span> var<span class="p">]))</span>
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="p">{</span>
+      leaf <span class="o">&lt;-</span> leaf <span class="o">%&gt;%</span> addLegend<span class="p">(</span>
+        pal <span class="o">=</span> factpal<span class="p">,</span> values <span class="o">=</span> <span class="p">(</span>loc2<span class="p">[,</span> var<span class="p">]),</span>
+        position <span class="o">=</span> <span class="s">&quot;bottomleft&quot;</span>
+      <span class="p">)</span>
+    <span class="p">}</span>
+    incProgress<span class="p">(</span><span class="m">0.2</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+    <span class="kr">return</span><span class="p">(</span>leaf<span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>This image globally maps <em>rstats</em> related tweets and shows an example retweet related to <em>rstats</em> from <em>askdrstats</em> in Amherst, Massachusetts. <img alt="&quot;image&quot;" height="500px" src="images/mapping_tweets.png" width="860px"></p>
+<h3>Network Analysis</h3>
+<h4>Retweets Network</h4>
+<p>For this feature, a topic's influence is assessed by searching mentions of retweets involving that topic. Sentiments of those retweets are assessed and distinguished by emotions like anger, anticipation, disgust, fear, joy, negative, positive, sadness, surprise, trust and null using the NRC Emotion Lexicon.</p>
+<p>First image shows retweets related to <em>rstats</em> while second image shows Rbloggers' retweeted tweets.
+<center>
+<img alt="&quot;image&quot;" height="500px" src="images/network_retweet.png" width="350px">
+<img alt="&quot;image&quot;" height="690px" src="images/network_retweet2.png" width="410px">
+</center></p>
+<h4>Following/Follower Network</h4>
+<p>Following/Follower network analysis feature shows individuals followed by a specified user. Magnitude of the following user vertex corresponds to the number of followers for that individual. Vertex click displays follower's screen name, description, location and friends, followers and status count amongst other information. For plotting, edges and nodes are defined and passed as arguments to the <em>graph_from_data_frame</em> function from the <em>igraph</em> package, which creates an igraph from the dataframe containing an edge list and edge/vertex attributes. This information is then passed as argument to the <em>visNetwork</em> function from the <em>igraph</em> package.</p>
+<p>Following image shows <em>rstudio's</em> followers as well as Twitter user information for R4DScommunity.
+<img alt="&quot;image&quot;" height="500px" src="images/network_follower.png" width="860px"></p>
+<h3>Emoji Analysis</h3>
+<p>Last feature of this application performs emoji analysis of tweets in a user's Twitter timeline, favorites and topic tweets. This features uses the emojis data from <a href="https://github.com/azkajavaid/TwitterAnalytics/blob/master/ui.R">today-is-a-good-day's emoji repository</a>, which provides R-encoding for emojis. Code below shows how emoji data is retrieved in appropriate encoding and plotted using ggplotly. Emoji point can moreover be clicked to retrieve the tweet associated with that emoji. Finally, trends in emoji use can be visualized over time. See the user interface and server files for further information about the code for this section.</p>
+<p>Following image shows emoji analysis on my favorite tweets. <img alt="&quot;image&quot;" height="500px" src="images/emojiFavorite.png" width="860px"></p>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 4 of the Shiny Application series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/flights-delay-shiny-application.html">Flights Delay Shiny Application</a></li>
+           <li><a href="/function-name-conflicts-shiny-application.html">Function Name Conflicts Shiny Application</a></li>
+           <li><a href="/location-explorer-shiny-application.html">Location Explorer Shiny Application</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Function Name Conflicts Shiny Application - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/function-name-conflicts-shiny-application.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="Function Name Conflicts Application uses the R documentation API to identify function conflicts (functions with same name) between two packages. For example, since function mutate is found in both plyr and dplyr, it is identified as a conflicting function. An awareness of same name functions could alleviate conflicts resulting from …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Function Name Conflicts Shiny Application"/>
+        <meta property="og:url" content="/function-name-conflicts-shiny-application.html"/>
+        <meta property="og:description" content="Function Name Conflicts Application uses the R documentation API to identify function conflicts (functions with same name) between two packages. For example, since function mutate is found in both plyr and dplyr, it is identified as a conflicting function. An awareness of same name functions could alleviate conflicts resulting from …"/>
+        <meta property="article:published_time" content="2018-04-07" />
+            <meta property="article:section" content="Shiny App" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li >
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li >
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/function-name-conflicts-shiny-application.html"
+                       rel="bookmark"
+                       title="Permalink to Function Name Conflicts Shiny Application">
+                        Function Name Conflicts Shiny Application
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-04-07T00:00:00-04:00"> Sat 07 April 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/shiny-app.html">Shiny App</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <h5>Function Name Conflicts Application uses the R documentation API to identify function conflicts (functions with same name) between two packages. For example, since function <em>mutate</em> is found in both <em>plyr</em> and <em>dplyr</em>, it is identified as a conflicting function. An awareness of same name functions could alleviate conflicts resulting from attachments of packages which contain those functions. This Shiny application is hosted via shinyapps.io, RStudio's hosting service for Shiny apps, accessible at <a href="https://aj17.shinyapps.io/r-conflicts/">Shiny Application</a>. For full code, see <a href="https://github.com/ajav17/r-conflicts">GitHub</a>.</h5>
+<p>This application uses <em>fromJSON</em> function from the <em>jsonlite</em> package for API request processing. Additional packages used for data processing are listed below.</p>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>jsonlite<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>curl<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>data.table<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>DT<span class="p">)</span>
+</pre></div>
+
+
+<p><br></br></p>
+<h3>Designing User Interface (UI)</h3>
+<p>User interface was defined using <em>fluidPage</em> from <em>shiny</em>, which creates a fluid page layout consisting of nested rows and columns. Output data tables (individual package tables and conflicting functions table) were embedded in columns. Action buttons and application background color were defined using HTML tags as shown below.</p>
+<div class="highlight"><pre><span></span><span class="c1"># Defining application background color</span>
+tags<span class="o">$</span><span class="kp">head</span><span class="p">(</span>
+  tags<span class="o">$</span>style<span class="p">(</span>HTML<span class="p">(</span><span class="s">&quot;</span>
+<span class="s">                    body {</span>
+<span class="s">                    background-color: #34495E;</span>
+<span class="s">                    color: #ffffff;</span>
+<span class="s">                    }</span>
+<span class="s">                    &quot;</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="c1"># Formatting action buttons</span>
+actionButton<span class="p">(</span><span class="s">&quot;package2_info&quot;</span><span class="p">,</span> <span class="s">&quot;Find Package Version&quot;</span><span class="p">,</span> style<span class="o">=</span><span class="s">&quot;color: #ffffff;background-color: #212F3D;&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></br></p>
+<h3>Calling R Documentation API</h3>
+<h4>Retrieving Package Version</h4>
+<p>All versions of the selected package were first retrieved using the R documentation API to later extract metrics and functions for that package. Retrieved version text was parsed using <em>fromJSON</em> as shown below.</p>
+<div class="highlight"><pre><span></span>url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;http://rdocumentation.org/api/packages/&quot;</span><span class="p">,</span> input<span class="o">$</span>package1<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+vers <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> <span class="kp">url</span><span class="p">)</span>
+version1 <span class="o">&lt;-</span> vers<span class="o">$</span>versions<span class="o">$</span><span class="kp">version</span>
+</pre></div>
+
+
+<p>After version retrieval, drop down panel for the selected package was updated using <code>updateSelectInput(session, "packageVersion1", choices = version1, selected = "0.7.3")</code> to reflect available version choices.</p>
+<p><br></br></p>
+<h3>Retrieving Package Metrics and Functions</h3>
+<p>Metrics for the selected package and version were retrieved using the R documentation API. Package metrics included package name, version, title, description, release date, license, maintainer name and contact information. The retrieved metrics text was parsed using <em>fromJSON</em> and additionally processed as shown.</p>
+<div class="highlight"><pre><span></span>url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://rdocumentation.org/api/packages/&quot;</span><span class="p">,</span> input<span class="o">$</span>package1<span class="p">,</span> <span class="s">&quot;/versions/&quot;</span><span class="p">,</span> input<span class="o">$</span>packageVersion1<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+dat <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> <span class="kp">url</span><span class="p">)</span>
+
+metrics <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat<span class="o">$</span>package_name<span class="p">,</span> dat<span class="o">$</span><span class="kp">version</span><span class="p">,</span> dat<span class="o">$</span>title<span class="p">,</span> dat<span class="o">$</span>description<span class="p">,</span>
+                      dat<span class="o">$</span>release_date<span class="p">,</span> dat<span class="o">$</span><span class="kp">license</span><span class="p">,</span> dat<span class="o">$</span>maintainer<span class="o">$</span>name<span class="p">,</span> dat<span class="o">$</span>maintainer<span class="o">$</span>email<span class="p">)</span>
+<span class="kp">colnames</span><span class="p">(</span>metrics<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Name&quot;</span><span class="p">,</span> <span class="s">&quot;Version&quot;</span><span class="p">,</span> <span class="s">&quot;Title&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">,</span> <span class="s">&quot;Release Date&quot;</span><span class="p">,</span> <span class="s">&quot;License&quot;</span><span class="p">,</span> <span class="s">&quot;Maintainer&quot;</span><span class="p">,</span> <span class="s">&quot;Contact&quot;</span><span class="p">)</span>
+metrics_data <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="kp">t</span><span class="p">(</span>metrics<span class="p">))</span>
+<span class="kp">colnames</span><span class="p">(</span>metrics_data<span class="p">)</span> <span class="o">&lt;-</span> <span class="s">&quot;Package Metrics&quot;</span>
+
+<span class="kr">if</span> <span class="p">(</span><span class="kp">nrow</span><span class="p">(</span>metrics_data<span class="p">)</span> <span class="o">==</span> <span class="m">0</span><span class="p">)</span>
+<span class="p">{</span>
+  metrics <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;No package metrics&quot;</span><span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>metrics<span class="p">)</span> <span class="o">&lt;-</span> <span class="s">&quot;Metrics&quot;</span>
+  <span class="kr">return</span><span class="p">(</span>metrics<span class="p">)</span>
+<span class="p">}</span>
+<span class="kp">else</span>
+<span class="p">{</span>
+  metrics_data <span class="o">&lt;-</span> setDT<span class="p">(</span><span class="kt">data.frame</span><span class="p">(</span>metrics_data<span class="p">),</span> keep.rownames <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)[]</span>
+  <span class="kp">colnames</span><span class="p">(</span>metrics_data<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Metrics&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span><span class="kt">data.frame</span><span class="p">(</span>metrics_data<span class="p">))</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>In addition to package metrics, functions for the selected package were retrieved by specifying package name and version. Function name and descriptions were selected and processed using dplyr as shown.</p>
+<div class="highlight"><pre><span></span>url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://rdocumentation.org/api/packages/&quot;</span><span class="p">,</span> input<span class="o">$</span>package1<span class="p">,</span> <span class="s">&quot;/versions/&quot;</span><span class="p">,</span> input<span class="o">$</span>packageVersion1<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+dat <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> <span class="kp">url</span><span class="p">)</span>
+<span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>dat<span class="o">$</span>topics<span class="o">$</span>name<span class="p">)</span> <span class="o">|</span> <span class="kp">is.null</span><span class="p">(</span>dat<span class="o">$</span>topics<span class="o">$</span>title<span class="p">))</span>
+<span class="p">{</span>
+  table <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;No functions in this version of the package&quot;</span><span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span><span class="kp">table</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="p">(</span><span class="kp">paste</span><span class="p">(</span>input<span class="o">$</span>package1<span class="p">,</span> <span class="s">&quot;Functions&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">))</span>
+  <span class="kr">return</span><span class="p">(</span><span class="kp">table</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kp">else</span>
+<span class="p">{</span>
+  packages1 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat<span class="o">$</span>topics<span class="o">$</span>name<span class="p">,</span> dat<span class="o">$</span>topics<span class="o">$</span>title<span class="p">)</span>
+  packages1 <span class="o">&lt;-</span> packages1 <span class="o">%&gt;%</span> arrange<span class="p">(</span>dat<span class="o">$</span>topics<span class="o">$</span>name<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>packages1<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="kp">paste</span><span class="p">(</span>input<span class="o">$</span>package1<span class="p">,</span> <span class="s">&quot;Functions&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+  <span class="kr">return</span><span class="p">(</span>packages1<span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;Function Metrics&quot;" height="500px" src="images/FunctionMetrics2.png" width="350px">  <img alt="&quot;Function Description&quot;" height="690px" src="images/FunctionDescription2.png" width="410px">
+</center>
+<br></br></p>
+<h3>Retrieving Function Conflicts</h3>
+<p>Same name functions were obtained using the R documentations API. Function names from both user specified packages were intersected to retrieve function conflicts. Code was embedded within a progress bar to show remaining run time as shown below.</p>
+<div class="highlight"><pre><span></span>withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+  incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Loading&quot;</span><span class="p">)</span>
+  url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://rdocumentation.org/api/packages/&quot;</span><span class="p">,</span> input<span class="o">$</span>package1<span class="p">,</span> <span class="s">&quot;/versions/&quot;</span><span class="p">,</span> input<span class="o">$</span>packageVersion1<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+  dat <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> <span class="kp">url</span><span class="p">)</span>
+  packages1 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat<span class="o">$</span>topics<span class="o">$</span>name<span class="p">)</span>
+  title1 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat<span class="o">$</span>topics<span class="o">$</span>title<span class="p">)</span>
+
+  data_package1 <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>packages1<span class="p">,</span> title1<span class="p">)</span>
+
+  url2 <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://rdocumentation.org/api/packages/&quot;</span><span class="p">,</span> input<span class="o">$</span>package2<span class="p">,</span> <span class="s">&quot;/versions/&quot;</span><span class="p">,</span> input<span class="o">$</span>packageVersion2<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+  dat2 <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> url2<span class="p">)</span>
+  packages2 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat2<span class="o">$</span>topics<span class="o">$</span>name<span class="p">)</span>
+  title2 <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat2<span class="o">$</span>topics<span class="o">$</span>title<span class="p">)</span>
+
+  data_package2 <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>packages2<span class="p">,</span> title2<span class="p">)</span>
+
+  inter <span class="o">&lt;-</span> <span class="kp">intersect</span><span class="p">(</span>packages1<span class="o">$</span>dat.topics.name<span class="p">,</span> packages2<span class="o">$</span>dat2.topics.name<span class="p">)</span>
+  inter <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>inter<span class="p">)</span>
+
+  incProgress<span class="p">(</span><span class="m">0.7</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing...&quot;</span><span class="p">)</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">nrow</span><span class="p">(</span>inter<span class="p">)</span> <span class="o">==</span> <span class="m">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    inter <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="s">&quot;No function conflicts&quot;</span><span class="p">)</span>
+    <span class="kp">colnames</span><span class="p">(</span>inter<span class="p">)</span> <span class="o">&lt;-</span> <span class="s">&quot;Conflicts&quot;</span>
+    <span class="kr">return</span><span class="p">(</span>inter<span class="p">)</span>
+  <span class="p">}</span>
+  <span class="kp">else</span>
+  <span class="p">{</span>
+    inter <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>inter<span class="p">)</span>
+    <span class="kp">colnames</span><span class="p">(</span>inter<span class="p">)</span> <span class="o">&lt;-</span> <span class="s">&quot;dat.topics.name&quot;</span>
+    inter<span class="o">$</span>dat.topics.name <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>inter<span class="o">$</span>dat.topics.name<span class="p">)</span>
+    data_package1<span class="o">$</span>dat.topics.name <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>data_package1<span class="o">$</span>dat.topics.name<span class="p">)</span>
+    data_package1<span class="o">$</span>dat.topics.title <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>data_package1<span class="o">$</span>dat.topics.title<span class="p">)</span>
+    inter2 <span class="o">&lt;-</span> inter <span class="o">%&gt;%</span> inner_join<span class="p">(</span>data_package1<span class="p">)</span>
+    data_package2 <span class="o">&lt;-</span> data_package2 <span class="o">%&gt;%</span> plyr<span class="o">::</span>rename<span class="p">(</span>replace <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;dat2.topics.name&quot;</span> <span class="o">=</span> <span class="s">&quot;dat.topics.name&quot;</span><span class="p">))</span>
+    data_package2<span class="o">$</span>dat.topics.name <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>data_package2<span class="o">$</span>dat.topics.name<span class="p">)</span>
+    data_package2<span class="o">$</span>dat2.topics.title <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span>data_package2<span class="o">$</span>dat2.topics.title<span class="p">)</span>
+    inter2 <span class="o">&lt;-</span> inter2 <span class="o">%&gt;%</span> inner_join<span class="p">(</span>data_package2<span class="p">)</span>
+    <span class="kp">colnames</span><span class="p">(</span>inter2<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;Conflicts&quot;</span><span class="p">,</span> <span class="kp">paste</span><span class="p">(</span>input<span class="o">$</span>package1<span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="kp">paste</span><span class="p">(</span>input<span class="o">$</span>package2<span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">))</span>
+    inter2 <span class="o">&lt;-</span> inter2 <span class="o">%&gt;%</span> arrange<span class="p">(</span>Conflicts<span class="p">)</span>
+    <span class="kr">return</span><span class="p">(</span>inter2<span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;Function Conflicts&quot;" height="700px" src="images/FunctionConflicts2.png" width="400px">
+</center></p>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 2 of the Shiny Application series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/flights-delay-shiny-application.html">Flights Delay Shiny Application</a></li>
+       </ul>
+       <h5>Next articles</h5>
+       <ul>
+           <li><a href="/location-explorer-shiny-application.html">Location Explorer Shiny Application</a></li>
+           <li><a href="/twitter-analytics-shiny-application.html">Twitter Analytics Shiny Application</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

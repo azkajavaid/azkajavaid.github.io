@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Location Explorer Shiny Application - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/location-explorer-shiny-application.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="Location Explorer Application uses Google Places, Eventbrite, Meetup and Yelp APIs to provide a coherent and systemic map of events, transportation, food and business vendors for specified geographic location. Application is hosted via shinyapps.io, RStudio&#39;s hosting service for Shiny apps, accessible at Shiny Application. This application uses the httr …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Location Explorer Shiny Application"/>
+        <meta property="og:url" content="/location-explorer-shiny-application.html"/>
+        <meta property="og:description" content="Location Explorer Application uses Google Places, Eventbrite, Meetup and Yelp APIs to provide a coherent and systemic map of events, transportation, food and business vendors for specified geographic location. Application is hosted via shinyapps.io, RStudio&#39;s hosting service for Shiny apps, accessible at Shiny Application. This application uses the httr …"/>
+        <meta property="article:published_time" content="2018-04-07" />
+            <meta property="article:section" content="Shiny App" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li >
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li >
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/location-explorer-shiny-application.html"
+                       rel="bookmark"
+                       title="Permalink to Location Explorer Shiny Application">
+                        Location Explorer Shiny Application
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-04-07T00:00:00-04:00"> Sat 07 April 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/shiny-app.html">Shiny App</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <h5>Location Explorer Application uses Google Places, Eventbrite, Meetup and Yelp APIs to provide a coherent and systemic map of events, transportation, food and business vendors for specified geographic location. Application is hosted via shinyapps.io, RStudio's hosting service for Shiny apps, accessible at <a href="https://aj17.shinyapps.io/locationexplorer/">Shiny Application</a>. This application uses the <em>httr</em> package to obtain authentication credentials and the <em>jsonlite</em> package to retrieve content from APIs in JSON format, which is then converted to R objects. In addition, <em>leaflet</em> is used for final plotting. See code chunk below for additional packages.</h5>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>jsonlite<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>anytime<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>httr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>shiny<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>leaflet<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>lubridate<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>stringr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>ggmap<span class="p">)</span>
+</pre></div>
+
+
+<p>This post provides an overview of APIs and Shiny workflow in R. For full code, see <a href="https://github.com/ajav17/LocationExplorer">GitHub</a>.
+<center>
+<img alt="&quot;image&quot;" height="500px" src="images/LocationExplorerUI2.png" width="850px">
+</center>
+<br></br></p>
+<h3>Designing User Interface (UI)</h3>
+<p>User interface was defined with the <em>navbarPage</em> function from the <em>shiny</em> package. This features creates a page with a navigation bar that holds nested tabPanels. The application background color, <em>#f45c5c</em>, is defined within an HTML tag. Sidebar layout is used to define user interaction features like Eventbrite/Meetup event types and time range. User defined event topic is captured using <em>textInput</em>, event search radius is captured using <em>numericInput</em>, event time range is defined using <em>sliderInput</em> and Google Places are defined using <em>radioButtons</em>. List of radio buttons is wrapped within a scroll bar using, <code>style = "overflow-y:scroll; max-height: 600px"</code>. Action buttons, <em>actionButton</em>, are formatted with HTML tags (i.e. button labels are bolded using <code>#eventAddress{font-weight:bold;}</code>). The main map is defined using leafletOutput within <em>mainPanel</em>.</p>
+<div class="highlight"><pre><span></span>ui <span class="o">&lt;-</span> navbarPage<span class="p">(</span>
+  <span class="s">&quot;Location Explorer&quot;</span><span class="p">,</span> inverse <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span>
+  navbarMenu<span class="p">(</span>
+    <span class="s">&quot;API Navigator&quot;</span><span class="p">,</span>
+    tabPanel<span class="p">(</span>
+      <span class="s">&quot;Google-Meetup-Eventbrite-Yelp&quot;</span><span class="p">,</span>
+      <span class="c1"># set app background color</span>
+      tags<span class="o">$</span><span class="kp">head</span><span class="p">(</span>
+        tags<span class="o">$</span>style<span class="p">(</span>HTML<span class="p">(</span><span class="s">&quot;</span>
+<span class="s">                                                       body {</span>
+<span class="s">                                                       background-color: #f45c5c;</span>
+<span class="s">                                                       color: #000000;</span>
+<span class="s">                                                       }</span>
+<span class="s">                                                       &quot;</span><span class="p">))</span>
+      <span class="p">),</span>
+
+      sidebarLayout<span class="p">(</span>
+        sidebarPanel<span class="p">(</span>
+          textInput<span class="p">(</span><span class="s">&quot;meetupTopic&quot;</span><span class="p">,</span> label <span class="o">=</span> <span class="s">&quot;Specify Events Topic (i.e. Technology)&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span>
+
+          textInput<span class="p">(</span><span class="s">&quot;yelpSearch&quot;</span><span class="p">,</span> label <span class="o">=</span> <span class="s">&quot;Specify Food/Cuisine Type&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="s">&quot;Cafe&quot;</span><span class="p">),</span>
+
+          <span class="c1"># numericInput(&quot;weeks&quot;, &quot;Specify events time range in weeks&quot;, 2),</span>
+
+          sliderInput<span class="p">(</span><span class="s">&quot;meetupTime&quot;</span><span class="p">,</span> <span class="s">&quot;Search for Meetup Events in this time range (in weeks): &quot;</span><span class="p">,</span> min <span class="o">=</span> <span class="m">1</span><span class="p">,</span> max <span class="o">=</span> <span class="m">20</span><span class="p">,</span> value <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)),</span>
+
+          selectInput<span class="p">(</span><span class="s">&quot;eventBriteTime&quot;</span><span class="p">,</span> <span class="s">&quot;Search for Eventbrite Events in this time range: &quot;</span><span class="p">,</span> <span class="kt">c</span><span class="p">(</span>
+            <span class="s">&quot;today&quot;</span> <span class="o">=</span> <span class="s">&quot;today&quot;</span><span class="p">,</span> <span class="s">&quot;tomorrow&quot;</span> <span class="o">=</span> <span class="s">&quot;tomorrow&quot;</span><span class="p">,</span>
+            <span class="s">&quot;this_week&quot;</span> <span class="o">=</span> <span class="s">&quot;this_week&quot;</span><span class="p">,</span> <span class="s">&quot;this_weekend&quot;</span> <span class="o">=</span> <span class="s">&quot;this_weekend&quot;</span><span class="p">,</span>
+            <span class="s">&quot;next_week&quot;</span> <span class="o">=</span> <span class="s">&quot;next_week&quot;</span><span class="p">,</span> <span class="s">&quot;this_month&quot;</span> <span class="o">=</span> <span class="s">&quot;this_month&quot;</span><span class="p">,</span>
+            <span class="s">&quot;next_month&quot;</span> <span class="o">=</span> <span class="s">&quot;next_month&quot;</span>
+          <span class="p">)),</span>
+
+
+          div<span class="p">(</span>
+            style <span class="o">=</span> <span class="s">&quot;display: inline-block;vertical-align:right; width: 165px;&quot;</span><span class="p">,</span>
+            actionButton<span class="p">(</span><span class="s">&quot;eventClick&quot;</span><span class="p">,</span> <span class="s">&quot;Show Events on Click&quot;</span><span class="p">,</span> style <span class="o">=</span> <span class="s">&quot;color: #ffffff;background-color: #f45c5c;margin: 4px;&quot;</span><span class="p">)</span>
+          <span class="p">),</span>
+
+          tags<span class="o">$</span><span class="kp">head</span><span class="p">(</span>
+            tags<span class="o">$</span>style<span class="p">(</span>HTML<span class="p">(</span><span class="s">&quot;#eventClick{font-weight:bold;}&quot;</span><span class="p">))</span>
+          <span class="p">),</span>
+
+          div<span class="p">(</span>
+            style <span class="o">=</span> <span class="s">&quot;display: inline-block;vertical-align:right; width: 25px;&quot;</span><span class="p">,</span>
+
+            actionButton<span class="p">(</span><span class="s">&quot;eventAddress&quot;</span><span class="p">,</span> <span class="s">&quot;Show Events on Address&quot;</span><span class="p">,</span> style <span class="o">=</span> <span class="s">&quot;color: #ffffff;background-color: #f45c5c;margin: 6px;&quot;</span><span class="p">)</span>
+          <span class="p">),</span>
+
+          tags<span class="o">$</span><span class="kp">head</span><span class="p">(</span>
+            tags<span class="o">$</span>style<span class="p">(</span>HTML<span class="p">(</span><span class="s">&quot;#eventAddress{font-weight:bold;}&quot;</span><span class="p">))</span>
+          <span class="p">),</span>
+
+          numericInput<span class="p">(</span><span class="s">&quot;miles&quot;</span><span class="p">,</span> <span class="s">&quot;Specify Search Radius (in miles)&quot;</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> min <span class="o">=</span> <span class="m">1</span><span class="p">,</span> max <span class="o">=</span> <span class="m">31</span><span class="p">),</span>
+          textInput<span class="p">(</span><span class="s">&quot;address&quot;</span><span class="p">,</span> label <span class="o">=</span> <span class="s">&quot;Enter address&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="s">&quot;Cambridge, MA&quot;</span><span class="p">),</span>
+          wellPanel<span class="p">(</span>
+            radioButtons<span class="p">(</span>
+              <span class="s">&quot;variable&quot;</span><span class="p">,</span> <span class="s">&quot;Choose a type:&quot;</span><span class="p">,</span>
+              <span class="kt">c</span><span class="p">(</span>
+                <span class="s">&quot;Accounting&quot;</span> <span class="o">=</span> <span class="s">&quot;accounting&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Airport&quot;</span> <span class="o">=</span> <span class="s">&quot;airport&quot;</span><span class="p">,</span> <span class="s">&quot;Amusement Park&quot;</span> <span class="o">=</span> <span class="s">&quot;amusement_park&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Aquarium&quot;</span> <span class="o">=</span> <span class="s">&quot;aquarium&quot;</span><span class="p">,</span> <span class="s">&quot;Art Gallery&quot;</span> <span class="o">=</span> <span class="s">&quot;art_gallery&quot;</span><span class="p">,</span>
+                <span class="s">&quot;ATM&quot;</span> <span class="o">=</span> <span class="s">&quot;atm&quot;</span><span class="p">,</span> <span class="s">&quot;Bakery&quot;</span> <span class="o">=</span> <span class="s">&quot;bakery&quot;</span><span class="p">,</span> <span class="s">&quot;Bank&quot;</span> <span class="o">=</span> <span class="s">&quot;bank&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Bar&quot;</span> <span class="o">=</span> <span class="s">&quot;bar&quot;</span><span class="p">,</span> <span class="s">&quot;Beauty Salon&quot;</span> <span class="o">=</span> <span class="s">&quot;beauty_salon&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Bicycle Store&quot;</span> <span class="o">=</span> <span class="s">&quot;bicycle_store&quot;</span><span class="p">,</span> <span class="s">&quot;Book Store&quot;</span> <span class="o">=</span> <span class="s">&quot;book_store&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Bowling Alley&quot;</span> <span class="o">=</span> <span class="s">&quot;bowling_alley&quot;</span><span class="p">,</span> <span class="s">&quot;Bus Station&quot;</span> <span class="o">=</span> <span class="s">&quot;bus_station&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Cafe&quot;</span> <span class="o">=</span> <span class="s">&quot;cafe&quot;</span><span class="p">,</span> <span class="s">&quot;Campground&quot;</span> <span class="o">=</span> <span class="s">&quot;campground&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Car Dealer&quot;</span> <span class="o">=</span> <span class="s">&quot;car_dealer&quot;</span><span class="p">,</span> <span class="s">&quot;Car Rental&quot;</span> <span class="o">=</span> <span class="s">&quot;car_rental&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Car Repair&quot;</span> <span class="o">=</span> <span class="s">&quot;car_repair&quot;</span><span class="p">,</span> <span class="s">&quot;Car Wash&quot;</span> <span class="o">=</span> <span class="s">&quot;car_wash&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Casino&quot;</span> <span class="o">=</span> <span class="s">&quot;casino&quot;</span><span class="p">,</span> <span class="s">&quot;Cemetery&quot;</span> <span class="o">=</span> <span class="s">&quot;cemetery&quot;</span><span class="p">,</span> <span class="s">&quot;Church&quot;</span> <span class="o">=</span> <span class="s">&quot;church&quot;</span><span class="p">,</span>
+                <span class="s">&quot;City Hall&quot;</span> <span class="o">=</span> <span class="s">&quot;city_hall&quot;</span><span class="p">,</span> <span class="s">&quot;Clothing Store&quot;</span> <span class="o">=</span> <span class="s">&quot;clothing_store&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Convenience Store&quot;</span> <span class="o">=</span> <span class="s">&quot;convenience_store&quot;</span><span class="p">,</span> <span class="s">&quot;Courthouse&quot;</span> <span class="o">=</span> <span class="s">&quot;courthouse&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Dentist&quot;</span> <span class="o">=</span> <span class="s">&quot;dentist&quot;</span><span class="p">,</span> <span class="s">&quot;Department Store&quot;</span> <span class="o">=</span> <span class="s">&quot;department_store&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Doctor&quot;</span> <span class="o">=</span> <span class="s">&quot;doctor&quot;</span><span class="p">,</span> <span class="s">&quot;Electrician&quot;</span> <span class="o">=</span> <span class="s">&quot;electrician&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Electronics Store&quot;</span> <span class="o">=</span> <span class="s">&quot;electronics_store&quot;</span><span class="p">,</span> <span class="s">&quot;Embassy&quot;</span> <span class="o">=</span> <span class="s">&quot;embassy&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Fire Station&quot;</span> <span class="o">=</span> <span class="s">&quot;fire_station&quot;</span><span class="p">,</span> <span class="s">&quot;Florist&quot;</span> <span class="o">=</span> <span class="s">&quot;florist&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Funeral Home&quot;</span> <span class="o">=</span> <span class="s">&quot;funeral_home&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Furniture Store&quot;</span> <span class="o">=</span> <span class="s">&quot;furniture_store&quot;</span><span class="p">,</span> <span class="s">&quot;Gas Station&quot;</span> <span class="o">=</span> <span class="s">&quot;gas_station&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Gym&quot;</span> <span class="o">=</span> <span class="s">&quot;gym&quot;</span><span class="p">,</span> <span class="s">&quot;Hair Care&quot;</span> <span class="o">=</span> <span class="s">&quot;hair_care&quot;</span><span class="p">,</span> <span class="s">&quot;Hardware Store&quot;</span> <span class="o">=</span> <span class="s">&quot;hardware_store&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Hindu Temple&quot;</span> <span class="o">=</span> <span class="s">&quot;hindu_temple&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Home Goods Store&quot;</span> <span class="o">=</span> <span class="s">&quot;home_goods_store&quot;</span><span class="p">,</span> <span class="s">&quot;Hospital&quot;</span> <span class="o">=</span> <span class="s">&quot;hospital&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Insurance Agency&quot;</span> <span class="o">=</span> <span class="s">&quot;insurance_agency&quot;</span><span class="p">,</span> <span class="s">&quot;Jewelry Store&quot;</span> <span class="o">=</span> <span class="s">&quot;jewelry_store&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Laundry&quot;</span> <span class="o">=</span> <span class="s">&quot;laundry&quot;</span><span class="p">,</span> <span class="s">&quot;Lawyer&quot;</span> <span class="o">=</span> <span class="s">&quot;lawyer&quot;</span><span class="p">,</span> <span class="s">&quot;Library&quot;</span> <span class="o">=</span> <span class="s">&quot;library&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Liquor Store&quot;</span> <span class="o">=</span> <span class="s">&quot;liquor_store&quot;</span><span class="p">,</span> <span class="s">&quot;Local Government Office&quot;</span> <span class="o">=</span> <span class="s">&quot;local_government_office&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Locksmith&quot;</span> <span class="o">=</span> <span class="s">&quot;locksmith&quot;</span><span class="p">,</span> <span class="s">&quot;Lodging&quot;</span> <span class="o">=</span> <span class="s">&quot;lodging&quot;</span><span class="p">,</span> <span class="s">&quot;Meal Delivery&quot;</span> <span class="o">=</span> <span class="s">&quot;meal_delivery&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Meal Takeaway&quot;</span> <span class="o">=</span> <span class="s">&quot;meal_takeaway&quot;</span><span class="p">,</span> <span class="s">&quot;Mosque&quot;</span> <span class="o">=</span> <span class="s">&quot;mosque&quot;</span><span class="p">,</span> <span class="s">&quot;Movie Rental&quot;</span> <span class="o">=</span> <span class="s">&quot;movie_rental&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Movie Theater&quot;</span> <span class="o">=</span> <span class="s">&quot;movie_theater&quot;</span><span class="p">,</span> <span class="s">&quot;Moving Company&quot;</span> <span class="o">=</span> <span class="s">&quot;moving_company&quot;</span><span class="p">,</span> <span class="s">&quot;Museum&quot;</span> <span class="o">=</span> <span class="s">&quot;museum&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Night Club&quot;</span> <span class="o">=</span> <span class="s">&quot;night_club&quot;</span><span class="p">,</span> <span class="s">&quot;Painter&quot;</span> <span class="o">=</span> <span class="s">&quot;painter&quot;</span><span class="p">,</span> <span class="s">&quot;Park&quot;</span> <span class="o">=</span> <span class="s">&quot;park&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Parking&quot;</span> <span class="o">=</span> <span class="s">&quot;parking&quot;</span><span class="p">,</span> <span class="s">&quot;Pet Store&quot;</span> <span class="o">=</span> <span class="s">&quot;pet_store&quot;</span><span class="p">,</span> <span class="s">&quot;Pharmacy&quot;</span> <span class="o">=</span> <span class="s">&quot;pharmacy&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Physiotherapist&quot;</span> <span class="o">=</span> <span class="s">&quot;physiotherapist&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Plumber&quot;</span> <span class="o">=</span> <span class="s">&quot;plumber&quot;</span><span class="p">,</span> <span class="s">&quot;Police&quot;</span> <span class="o">=</span> <span class="s">&quot;police&quot;</span><span class="p">,</span> <span class="s">&quot;Post Office&quot;</span> <span class="o">=</span> <span class="s">&quot;post_office&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Real Estate Agency&quot;</span> <span class="o">=</span> <span class="s">&quot;real_estate_agency&quot;</span><span class="p">,</span> <span class="s">&quot;Restaurant&quot;</span> <span class="o">=</span> <span class="s">&quot;restaurant&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Roofing Contractor&quot;</span> <span class="o">=</span> <span class="s">&quot;roofing_contractor&quot;</span><span class="p">,</span> <span class="s">&quot;RV Park&quot;</span> <span class="o">=</span> <span class="s">&quot;rv_park&quot;</span><span class="p">,</span>
+                <span class="s">&quot;School&quot;</span> <span class="o">=</span> <span class="s">&quot;school&quot;</span><span class="p">,</span> <span class="s">&quot;Shoe Store&quot;</span> <span class="o">=</span> <span class="s">&quot;shoe_store&quot;</span><span class="p">,</span> <span class="s">&quot;Shopping Mall&quot;</span> <span class="o">=</span> <span class="s">&quot;shopping_mall&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Spa&quot;</span> <span class="o">=</span> <span class="s">&quot;spa&quot;</span><span class="p">,</span> <span class="s">&quot;Stadium&quot;</span> <span class="o">=</span> <span class="s">&quot;stadium&quot;</span><span class="p">,</span> <span class="s">&quot;Storage&quot;</span> <span class="o">=</span> <span class="s">&quot;storage&quot;</span><span class="p">,</span> <span class="s">&quot;Store&quot;</span> <span class="o">=</span> <span class="s">&quot;store&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Subway Station&quot;</span> <span class="o">=</span> <span class="s">&quot;subway_station&quot;</span><span class="p">,</span> <span class="s">&quot;Synagogue&quot;</span> <span class="o">=</span> <span class="s">&quot;synagogue&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Taxi Stand&quot;</span> <span class="o">=</span> <span class="s">&quot;taxi_stand&quot;</span><span class="p">,</span> <span class="s">&quot;Train Station&quot;</span> <span class="o">=</span> <span class="s">&quot;train_station&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Transit Station&quot;</span> <span class="o">=</span> <span class="s">&quot;transit_station&quot;</span><span class="p">,</span> <span class="s">&quot;Travel Agency&quot;</span> <span class="o">=</span> <span class="s">&quot;travel_agency&quot;</span><span class="p">,</span>
+                <span class="s">&quot;University&quot;</span> <span class="o">=</span> <span class="s">&quot;university&quot;</span><span class="p">,</span> <span class="s">&quot;Veterinary Care&quot;</span> <span class="o">=</span> <span class="s">&quot;veterinary_care&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Zoo&quot;</span> <span class="o">=</span> <span class="s">&quot;zoo&quot;</span>
+              <span class="p">),</span> selected <span class="o">=</span> <span class="s">&quot;cafe&quot;</span>
+            <span class="p">),</span> style <span class="o">=</span> <span class="s">&quot;overflow-y:scroll; max-height: 600px&quot;</span>
+          <span class="p">)</span>
+        <span class="p">),</span>
+        mainPanel<span class="p">(</span>
+          h4<span class="p">(</span><span class="s">&quot;Location Explorer App displays location enabled local businesses, landmarks, and</span>
+<span class="s">                                            transit information via the Google Places API. In addition, this app</span>
+<span class="s">                                            displays local events</span>
+<span class="s">                                            via the Meetup and Eventbrite APIs and food vendors</span>
+<span class="s">                                            via the Yelp API. Specify a location by clicking on the map or by manually searching the address by</span>
+<span class="s">                                            vendor and event type and timeframe. Click on a popup to</span>
+<span class="s">                                            retrieve more information about the business/event. By combining business, event and food services,</span>
+<span class="s">                                            Location Explorer Application provides a centralized and systematized platform for</span>
+<span class="s">                                            information retrieval.&quot;</span><span class="p">,</span> style <span class="o">=</span> <span class="s">&quot;color:white&quot;</span><span class="p">),</span>
+
+          tags<span class="o">$</span><span class="kp">head</span><span class="p">(</span>
+            tags<span class="o">$</span>style<span class="p">(</span>HTML<span class="p">(</span><span class="s">&quot;#zoomOut{font-weight:bold;}&quot;</span><span class="p">))</span>
+          <span class="p">),</span>
+
+          tags<span class="o">$</span><span class="kp">head</span><span class="p">(</span>
+            tags<span class="o">$</span>style<span class="p">(</span>HTML<span class="p">(</span><span class="s">&quot;#zoomIn{font-weight:bold;}&quot;</span><span class="p">))</span>
+          <span class="p">),</span>
+
+          leafletOutput<span class="p">(</span><span class="s">&quot;map&quot;</span><span class="p">,</span> height <span class="o">=</span> <span class="m">700</span><span class="p">)</span>
+        <span class="p">)</span>
+      <span class="p">)</span>
+    <span class="p">)</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+
+
+<p>Given an address, search radius, optional Eventbrite/Meetup events topic, events time range and Google Places vendor, the application produces a map of events. Map can also be clicked to retrieve latitude and longitude, which are geocoded and converted to an appropriate location using the <em>ggmap</em> package.
+<center>
+<img alt="&quot;image&quot;" height="500px" src="images/LocationExplorerPopup2.png" width="850px">
+</center>
+<br></br></p>
+<h3>Google Places API</h3>
+<p>To produce the map of events shown above, user search parameters are concatenated and passed in as arguments to the <em>fromJSON</em> function. As the code chunk below shows, Google Places API is called with the appropriate latitude and longitude coordinates, search radius, location and authentication key credentials.</p>
+<div class="highlight"><pre><span></span>url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=&quot;</span><span class="p">,</span> clat<span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> clng<span class="p">,</span> <span class="s">&quot;&amp;radius=&quot;</span><span class="p">,</span> distance<span class="p">,</span> <span class="s">&quot;&amp;types=&quot;</span><span class="p">,</span> input<span class="o">$</span>variable<span class="p">,</span> <span class="s">&quot;&amp;key=KEY&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+document <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> <span class="kp">url</span><span class="p">)</span>
+
+dat <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>
+  document<span class="o">$</span>results<span class="o">$</span>geometry<span class="o">$</span>location<span class="o">$</span>lng<span class="p">,</span> document<span class="o">$</span>results<span class="o">$</span>geometry<span class="o">$</span>location<span class="o">$</span>lat<span class="p">,</span>
+  document<span class="o">$</span>results<span class="o">$</span>name
+<span class="p">)</span>
+</pre></div>
+
+
+<p>Retrieved data, <em>document</em>, is further parsed to retrieve vendor rating, price range, proximity information and photos, if present.</p>
+<div class="highlight"><pre><span></span><span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>rating<span class="p">)</span> <span class="o">==</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="p">{</span>
+  rating <span class="o">&lt;-</span> <span class="kc">NA</span>
+  dat <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>dat<span class="p">,</span> rating<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kr">else</span> <span class="p">{</span>
+  dat <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>dat<span class="p">,</span> document<span class="o">$</span>results<span class="o">$</span>rating<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>price_level<span class="p">)</span> <span class="o">==</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="p">{</span>
+  price_level <span class="o">&lt;-</span> <span class="kc">NA</span>
+  dat <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>dat<span class="p">,</span> price_level<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">,</span> <span class="s">&quot;price_level&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kr">else</span> <span class="p">{</span>
+  dat <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>dat<span class="p">,</span> document<span class="o">$</span>results<span class="o">$</span>price_level<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">,</span> <span class="s">&quot;price&quot;</span><span class="p">)</span>
+  dat <span class="o">&lt;-</span> dat <span class="o">%&gt;%</span> dplyr<span class="o">::</span>inner_join<span class="p">(</span>googlePrices<span class="p">)</span>
+  dat <span class="o">&lt;-</span> dat <span class="o">%&gt;%</span> dplyr<span class="o">::</span>select<span class="p">(</span>lng<span class="p">,</span> lat<span class="p">,</span> name<span class="p">,</span> rating<span class="p">,</span> level<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">,</span> <span class="s">&quot;price_level&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>vicinity<span class="p">)</span> <span class="o">==</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="p">{</span>
+  vicinity <span class="o">&lt;-</span> <span class="kc">NA</span>
+  dat <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>dat<span class="p">,</span> vicinity<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">,</span> <span class="s">&quot;price_level&quot;</span><span class="p">,</span> <span class="s">&quot;vicinity&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kr">else</span> <span class="p">{</span>
+  dat <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>dat<span class="p">,</span> document<span class="o">$</span>results<span class="o">$</span>vicinity<span class="p">)</span>
+  <span class="kp">colnames</span><span class="p">(</span>dat<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;lng&quot;</span><span class="p">,</span> <span class="s">&quot;lat&quot;</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;rating&quot;</span><span class="p">,</span> <span class="s">&quot;price_level&quot;</span><span class="p">,</span> <span class="s">&quot;vicinity&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+photo <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>name<span class="p">))</span>
+<span class="kr">if</span> <span class="p">(</span><span class="kp">length</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>photos<span class="p">)</span> <span class="o">!=</span> <span class="m">0</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>photos<span class="p">))</span>
+  <span class="p">{</span>
+    <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>document<span class="o">$</span>results<span class="o">$</span>photos<span class="p">[</span>i<span class="p">][[</span><span class="m">1</span><span class="p">]])</span> <span class="o">==</span> <span class="kc">FALSE</span><span class="p">)</span> <span class="p">{</span>
+      photo<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="p">(</span><span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://maps.googleapis.com/maps/api/place/photo?maxwidth=300&amp;photoreference=&quot;</span><span class="p">,</span> document<span class="o">$</span>results<span class="o">$</span>photos<span class="p">[</span>i<span class="p">][[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span>photo_reference<span class="p">[</span><span class="m">1</span><span class="p">],</span> <span class="s">&quot;&amp;sensor=false&amp;key=AIzaSyAvfjBJURrg50Axqu5By-20oIc49kfM7mM&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="p">{</span>
+      photo<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;No Available Photo&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+dat <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>dat<span class="p">,</span> photo<span class="p">)</span>
+</pre></div>
+
+
+<p>Image below shows Darwin's cafe as one of the results of searching for <em>Cafes</em>, retrieved using the Google Places API.</p>
+<p><center>
+<img alt="&quot;image&quot;" height="500px" src="images/GoogleAPI.png" width="850px">
+</center></p>
+<p><br></br></p>
+<h3>Eventbrite API</h3>
+<p>In addition to the Google Places API, Eventbrite and Meetup APIs are used to retrieve geocoded event information. Eventbrite API is used to obtain event information using latitude, longitude, event search radius, event type and authentication token as shown below.</p>
+<div class="highlight"><pre><span></span><span class="c1"># if event type (i.e. technology) is defined by the user</span>
+eventBUrl <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://www.eventbriteapi.com/v3/events/search/?location.latitude=&quot;</span><span class="p">,</span> clat<span class="p">,</span> <span class="s">&quot;&amp;location.longitude=&quot;</span><span class="p">,</span> clng<span class="p">,</span> <span class="s">&quot;&amp;location.within=&quot;</span><span class="p">,</span> input<span class="o">$</span>miles<span class="p">,</span> <span class="s">&quot;mi&amp;&quot;</span><span class="p">,</span> <span class="s">&quot;start_date.keyword=&quot;</span><span class="p">,</span> input<span class="o">$</span>eventBriteTime<span class="p">,</span> <span class="s">&quot;&amp;categories=&quot;</span><span class="p">,</span> eventid<span class="p">,</span> <span class="s">&quot;&amp;token=TOKEN&amp;expand=venue&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+resEventB <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> eventBUrl<span class="p">)</span>
+
+<span class="c1"># if no event type is defined</span>
+eventBUrl <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://www.eventbriteapi.com/v3/events/search/?location.latitude=&quot;</span><span class="p">,</span> clat<span class="p">,</span> <span class="s">&quot;&amp;location.longitude=&quot;</span><span class="p">,</span> clng<span class="p">,</span> <span class="s">&quot;&amp;location.within=&quot;</span><span class="p">,</span> input<span class="o">$</span>miles<span class="p">,</span> <span class="s">&quot;mi&amp;&quot;</span><span class="p">,</span> <span class="s">&quot;start_date.keyword=&quot;</span><span class="p">,</span> input<span class="o">$</span>eventBriteTime<span class="p">,</span> <span class="s">&quot;&amp;token=TOKEN&amp;expand=venue&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+resEventB <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> eventBUrl<span class="p">)</span>
+</pre></div>
+
+
+<p>Location and event time and date information for the Eventbrite events is further parsed using the <em>lubridate</em> package.</p>
+<div class="highlight"><pre><span></span>startLocal <span class="o">&lt;-</span> <span class="kp">strsplit</span><span class="p">(</span>resEventB<span class="o">$</span>events<span class="o">$</span>start<span class="o">$</span><span class="kp">local</span><span class="p">,</span> <span class="s">&quot;T&quot;</span><span class="p">)</span>
+startLocalDate <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>startLocal<span class="p">))</span>
+startLocalTime <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>startLocal<span class="p">))</span>
+
+endLocal <span class="o">&lt;-</span> <span class="kp">strsplit</span><span class="p">(</span>resEventB<span class="o">$</span>events<span class="o">$</span>end<span class="o">$</span><span class="kp">local</span><span class="p">,</span> <span class="s">&quot;T&quot;</span><span class="p">)</span>
+endLocalDate <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>endLocal<span class="p">))</span>
+endLocalTime <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>endLocal<span class="p">))</span>
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>startLocal<span class="p">))</span>
+<span class="p">{</span>
+  startLocalDate<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> startLocal<span class="p">[[</span>i<span class="p">]][</span><span class="m">1</span><span class="p">]</span>
+  startLocalTime<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> startLocal<span class="p">[[</span>i<span class="p">]][</span><span class="m">2</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>endLocal<span class="p">))</span>
+<span class="p">{</span>
+  endLocalDate<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> endLocal<span class="p">[[</span>i<span class="p">]][</span><span class="m">1</span><span class="p">]</span>
+  endLocalTime<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> endLocal<span class="p">[[</span>i<span class="p">]][</span><span class="m">2</span><span class="p">]</span>
+<span class="p">}</span>
+startLocalDateFinal <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span><span class="kp">format</span><span class="p">(</span><span class="kp">as.Date</span><span class="p">(</span>startLocalDate<span class="p">),</span> format <span class="o">=</span> <span class="s">&quot;%B %d %Y&quot;</span><span class="p">))</span>
+startLocalWeekday <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span><span class="kp">weekdays</span><span class="p">(</span><span class="kp">as.Date</span><span class="p">(</span>startLocalDate<span class="p">)))</span>
+
+endLocalDateFinal <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span><span class="kp">format</span><span class="p">(</span><span class="kp">as.Date</span><span class="p">(</span>endLocalDate<span class="p">),</span> format <span class="o">=</span> <span class="s">&quot;%B %d %Y&quot;</span><span class="p">))</span>
+endLocalWeekday <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span><span class="kp">weekdays</span><span class="p">(</span><span class="kp">as.Date</span><span class="p">(</span>endLocalDate<span class="p">)))</span>
+
+startLocalTimeFinal <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span><span class="kp">format</span><span class="p">(</span><span class="kp">strptime</span><span class="p">(</span>startLocalTime<span class="p">,</span> format <span class="o">=</span> <span class="s">&quot;%H:%M:%S&quot;</span><span class="p">),</span> <span class="s">&quot;%I:%M:%S %p&quot;</span><span class="p">))</span>
+endLocalTimeFinal <span class="o">&lt;-</span> <span class="kp">try</span><span class="p">(</span><span class="kp">format</span><span class="p">(</span><span class="kp">strptime</span><span class="p">(</span>endLocalTime<span class="p">,</span> format <span class="o">=</span> <span class="s">&quot;%H:%M:%S&quot;</span><span class="p">),</span> <span class="s">&quot;%I:%M:%S %p&quot;</span><span class="p">))</span>
+</pre></div>
+
+
+<p>Popup below shows an event in Somerville, MA, retrieved using Eventbrite API.</p>
+<p><center>
+<img alt="&quot;image&quot;" height="500px" src="images/EventbriteAPI.png" width="850px">
+</center>
+<br></br></p>
+<h3>Meetup API</h3>
+<p>Meetup events are obtained by concatenating location, search radius, topic, time range and key information as argument to <em>fromJSON</em>.</p>
+<div class="highlight"><pre><span></span><span class="c1"># if event type (i.e. technology) is defined by the user</span>
+json.url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;http://api.meetup.com/2/open_events.json?lat=&quot;</span><span class="p">,</span> clat<span class="p">,</span> <span class="s">&quot;&amp;lon=&quot;</span><span class="p">,</span> clng<span class="p">,</span> <span class="s">&quot;&amp;radius=&quot;</span><span class="p">,</span> input<span class="o">$</span>miles<span class="p">,</span> <span class="s">&quot;&amp;topic=&quot;</span><span class="p">,</span> input<span class="o">$</span>meetupTopic<span class="p">,</span> <span class="s">&quot;&amp;time=&quot;</span><span class="p">,</span> input<span class="o">$</span>meetupTime<span class="p">[</span><span class="m">1</span><span class="p">],</span> <span class="s">&quot;w&quot;</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> input<span class="o">$</span>meetupTime<span class="p">[</span><span class="m">2</span><span class="p">],</span> <span class="s">&quot;w&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;fields=group_photos;key=KEY&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+<span class="c1"># if no event type is defined</span>
+json.url <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;http://api.meetup.com/2/open_events.json?lat=&quot;</span><span class="p">,</span> clat<span class="p">,</span> <span class="s">&quot;&amp;lon=&quot;</span><span class="p">,</span> clng<span class="p">,</span> <span class="s">&quot;&amp;radius=&quot;</span><span class="p">,</span> input<span class="o">$</span>miles<span class="p">,</span> <span class="s">&quot;&amp;time=&quot;</span><span class="p">,</span> input<span class="o">$</span>meetupTime<span class="p">[</span><span class="m">1</span><span class="p">],</span> <span class="s">&quot;w&quot;</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> input<span class="o">$</span>meetupTime<span class="p">[</span><span class="m">2</span><span class="p">],</span> <span class="s">&quot;w&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;fields=group_photos;key=KEY&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+res <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> json.url<span class="p">)</span>
+</pre></div>
+
+
+<p>Retrieved text is further processed to parse associated image and event time shown in the querying user's time zone (as indicated by the user's searched latitude and longitude paramters).</p>
+<div class="highlight"><pre><span></span>photos <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>group<span class="o">$</span>photos<span class="p">))</span>
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>distance<span class="p">))</span>
+<span class="p">{</span>
+  <span class="c1"># photos</span>
+  photo <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>group<span class="o">$</span>photos<span class="p">[[</span>i<span class="p">]])</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>photo<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="p">]</span><span class="o">$</span>photo_link<span class="p">))</span> <span class="p">{</span>
+    photos<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="kp">as.character</span><span class="p">(</span><span class="s">&quot;NA&quot;</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    photos<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> photo<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="p">]</span><span class="o">$</span>photo_link
+  <span class="p">}</span>
+<span class="p">}</span>
+
+eventsDat <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>photos<span class="p">)</span>
+
+<span class="c1"># Calculating event start time</span>
+eventsDat<span class="o">$</span>timeUTC <span class="o">&lt;-</span> anytime<span class="p">(</span><span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>time <span class="o">*</span> <span class="m">0.001</span><span class="p">)))</span>
+currTime <span class="o">&lt;-</span> <span class="kp">Sys.time</span><span class="p">()</span>
+currDate <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.POSIXct</span><span class="p">(</span>currTime<span class="p">))</span>
+
+<span class="c1"># Retrieving user&#39;s time zone</span>
+url2 <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;https://maps.googleapis.com/maps/api/timezone/json?location=&quot;</span><span class="p">,</span> clat<span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> clng<span class="p">,</span> <span class="s">&quot;&amp;timestamp=&quot;</span><span class="p">,</span> currDate<span class="p">,</span> <span class="s">&quot;&amp;key=AIzaSyAvfjBJURrg50Axqu5By-20oIc49kfM7mM&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+document2 <span class="o">&lt;-</span> fromJSON<span class="p">(</span>txt <span class="o">=</span> url2<span class="p">)</span>
+eventsDat<span class="o">$</span>timeZone <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span>eventsDat<span class="o">$</span>timeUTC<span class="p">,</span> tz <span class="o">=</span> document2<span class="o">$</span>timeZoneId<span class="p">,</span> usetz <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+<span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>eventsDat<span class="o">$</span>timeZone<span class="p">)</span> <span class="o">==</span> <span class="kc">FALSE</span><span class="p">)</span> <span class="p">{</span>
+  timeOnlyStart <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span>ymd_hms<span class="p">(</span>eventsDat<span class="o">$</span>timeZone<span class="p">),</span> <span class="s">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1"># extract just the time</span>
+  eventsDat<span class="o">$</span>timeStartFinal <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span><span class="kp">strptime</span><span class="p">(</span>timeOnlyStart<span class="p">,</span> format <span class="o">=</span> <span class="s">&quot;%H:%M:%S&quot;</span><span class="p">),</span> <span class="s">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span>
+  eventsDat<span class="o">$</span>startDate <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>eventsDat<span class="o">$</span>timeZone<span class="p">)</span>
+  eventsDat<span class="o">$</span>startDateFinal <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span>eventsDat<span class="o">$</span>startDate<span class="p">,</span> format <span class="o">=</span> <span class="s">&quot;%B %d %Y&quot;</span><span class="p">)</span>
+  eventsDat<span class="o">$</span>startWeekday <span class="o">&lt;-</span> <span class="kp">weekdays</span><span class="p">(</span>eventsDat<span class="o">$</span>startDate<span class="p">)</span>
+<span class="p">}</span>
+<span class="kr">else</span> <span class="p">{</span>
+  timeOnlyStart <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>timeStartFinal <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>startDate <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>startDateFinal <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>startWeekday <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+<span class="p">}</span>
+<span class="c1"># Calculating event end time</span>
+timeEnd <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;raw&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>eventsDat<span class="o">$</span>timeUTC<span class="p">))</span>
+<span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>duration<span class="p">))</span> <span class="p">{</span>
+  eventsDat<span class="o">$</span>timeEnd <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>timeEndZone <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  timeOnlyEnd <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>timeEndFinal <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>endDate <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>endDateFinal <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  eventsDat<span class="o">$</span>endWeekday <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+<span class="p">}</span>
+<span class="kr">else</span> <span class="p">{</span>
+  eventsDat<span class="o">$</span>timeEnd <span class="o">&lt;-</span> <span class="kp">as.POSIXlt</span><span class="p">(</span>eventsDat<span class="o">$</span>timeUTC<span class="p">)</span> <span class="o">+</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>duration<span class="p">))</span> <span class="o">*</span> <span class="m">0.001</span>
+  eventsDat<span class="o">$</span>timeEndZone <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span>eventsDat<span class="o">$</span>timeEnd<span class="p">,</span> tz <span class="o">=</span> document2<span class="o">$</span>timeZoneId<span class="p">,</span> usetz <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+  timeOnlyEnd <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span>ymd_hms<span class="p">(</span>eventsDat<span class="o">$</span>timeEndZone<span class="p">),</span> <span class="s">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1"># extract just the time</span>
+  eventsDat<span class="o">$</span>timeEndFinal <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span><span class="kp">strptime</span><span class="p">(</span>timeOnlyEnd<span class="p">,</span> format <span class="o">=</span> <span class="s">&quot;%H:%M:%S&quot;</span><span class="p">),</span> <span class="s">&quot;%I:%M:%S %p&quot;</span><span class="p">)</span>
+  eventsDat<span class="o">$</span>endDate <span class="o">&lt;-</span> <span class="kp">as.Date</span><span class="p">(</span>eventsDat<span class="o">$</span>timeEndZone<span class="p">)</span>
+  eventsDat<span class="o">$</span>endDateFinal <span class="o">&lt;-</span> <span class="kp">format</span><span class="p">(</span>eventsDat<span class="o">$</span>endDate<span class="p">,</span> format <span class="o">=</span> <span class="s">&quot;%B %d %Y&quot;</span><span class="p">)</span>
+  eventsDat<span class="o">$</span>endWeekday <span class="o">&lt;-</span> <span class="kp">weekdays</span><span class="p">(</span>eventsDat<span class="o">$</span>endDate<span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Popup below shows a hiring and networking event in Big Data in Massachusetts.
+<center>
+<img alt="&quot;image&quot;" height="500px" src="images/MeetupAPI.png" width="850px">
+</center></p>
+<p><br></br></p>
+<h3>Yelp API</h3>
+<p>In addition to the Google, Eventbrite and Meetup APIs, Yelp API was used to retrieve information about geocoded food vendors. Yelp API switched to API authentication from OAuth 2.0 authentication in March, 2018 and therefore only requires API key for authentication. To retrieve content, search parameter, latitude, longitude and search radius are passed as inputs to <em>modify_url</em> from the <em>httr</em> package. The modified url and the API key are then passed as parameters to <em>GET</em> from <em>httr</em>. The contents of the request are retrieved using <em>content</em> from <em>httr</em>.</p>
+<div class="highlight"><pre><span></span>url2 <span class="o">&lt;-</span> modify_url<span class="p">(</span>
+  <span class="s">&quot;https://api.yelp.com&quot;</span><span class="p">,</span> path <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;v3&quot;</span><span class="p">,</span> <span class="s">&quot;businesses&quot;</span><span class="p">,</span> <span class="s">&quot;search&quot;</span><span class="p">),</span>
+  query <span class="o">=</span> <span class="kt">list</span><span class="p">(</span>
+    term <span class="o">=</span> input<span class="o">$</span>yelpSearch<span class="p">,</span> latitude <span class="o">=</span> clat<span class="p">,</span> longitude <span class="o">=</span> clng<span class="p">,</span> radius_filter <span class="o">=</span> radiusYelp<span class="p">,</span>
+    limit <span class="o">=</span> <span class="m">10</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+res <span class="o">&lt;-</span> GET<span class="p">(</span>url2<span class="p">,</span> add_headers<span class="p">(</span><span class="s">&quot;Authorization&quot;</span> <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;bearer&quot;</span><span class="p">,</span> API_KEY<span class="p">)))</span>
+ct <span class="o">&lt;-</span> content<span class="p">(</span>res<span class="p">)</span>
+</pre></div>
+
+
+<p>Further text processing is used to retrieve business name, location, closing status, price, rating and image if present for the food vendors using the Yelp API.</p>
+<div class="highlight"><pre><span></span>latitudeYelp <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+longitudeYelp <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+businessName <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+imageURL <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+isClosed <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+businessRating <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+businessPrice <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+displayAddress <span class="o">&lt;-</span> <span class="kt">vector</span><span class="p">(</span><span class="s">&quot;character&quot;</span><span class="p">,</span> <span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">))</span>
+<span class="p">{</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>coordinates<span class="o">$</span>latitude<span class="p">))</span> <span class="p">{</span>
+    latitudeYelp<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    latitudeYelp<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>coordinates<span class="o">$</span>latitude
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>coordinates<span class="o">$</span>longitude<span class="p">))</span> <span class="p">{</span>
+    longitudeYelp<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    longitudeYelp<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>coordinates<span class="o">$</span>longitude
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>name<span class="p">))</span> <span class="p">{</span>
+    businessName<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    businessName<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>name
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>image_url<span class="p">))</span> <span class="p">{</span>
+    imageURL<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    imageURL<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>image_url
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>is_closed<span class="p">))</span> <span class="p">{</span>
+    isClosed<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    isClosed<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>is_closed
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>rating<span class="p">))</span> <span class="p">{</span>
+    businessRating<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    businessRating<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>rating
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>price<span class="p">))</span> <span class="p">{</span>
+    businessPrice<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    businessPrice<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>price
+  <span class="p">}</span>
+  <span class="kr">if</span> <span class="p">(</span><span class="kp">is.null</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">))</span> <span class="p">{</span>
+    displayAddress<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> <span class="s">&quot;NA&quot;</span>
+    <span class="c1"># print(i)</span>
+  <span class="p">}</span>
+  <span class="kr">else</span> <span class="p">{</span>
+    <span class="kr">if</span> <span class="p">(</span><span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">)</span> <span class="o">==</span> <span class="m">1</span><span class="p">)</span> <span class="p">{</span>
+      displayAddress<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="kr">if</span> <span class="p">(</span><span class="kp">length</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">)</span> <span class="o">==</span> <span class="m">2</span><span class="p">)</span> <span class="p">{</span>
+      add <span class="o">&lt;-</span> <span class="kp">paste</span><span class="p">(</span>ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">[[</span><span class="m">1</span><span class="p">]],</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">[[</span><span class="m">2</span><span class="p">]],</span> sep <span class="o">=</span> <span class="s">&quot;, &quot;</span><span class="p">)</span>
+      displayAddress<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> add
+    <span class="p">}</span>
+    <span class="kr">else</span> <span class="p">{</span>
+      displayAddress<span class="p">[[</span>i<span class="p">]]</span> <span class="o">&lt;-</span> ct<span class="o">$</span>businesses<span class="p">[[</span>i<span class="p">]]</span><span class="o">$</span>location<span class="o">$</span>display_address<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Image below shows example of retrieved Tatte Bakery and Cafe via Yelp API in Cambridge, MA.
+<center>
+<img alt="&quot;image&quot;" height="500px" src="images/YelpAPI.png" width="850px">
+</center></p>
+<p><br></br></p>
+<h3>Plotting via Leaflet</h3>
+<p>Popup symbols were specified using the <em>makeIcon</em> function from the <em>leaflet</em> package given an image url, width and height. Code below shows an example specification of an icon. Symbols were defined for each of the four APIs (Eventbrite, Google, Meetup and Yelp).</p>
+<div class="highlight"><pre><span></span>googleIcon <span class="o">&lt;-</span> makeIcon<span class="p">(</span>
+  iconUrl <span class="o">=</span> <span class="s">&quot;IMAGE URL&quot;</span><span class="p">,</span>
+  iconWidth <span class="o">=</span> <span class="m">40</span><span class="p">,</span> iconHeight <span class="o">=</span> <span class="m">40</span><span class="p">,</span>
+  iconAnchorX <span class="o">=</span> <span class="m">0</span><span class="p">,</span> iconAnchorY <span class="o">=</span> <span class="m">0</span>
+<span class="p">)</span>
+</pre></div>
+
+
+<p>Leaflet was used for final plotting. Leaflet, <em>map</em>, was initially defined with default coordinates and <em>OpenStreetMap.France</em> tiles. For additional tiles, see <a href="http://leaflet-extras.github.io/leaflet-providers/preview/">documentation</a>. As shown below, output from each of the four APIs was added as a separate Marker layer. In each layer, location information was encoded in latitude and longitude coordinates. Popup detailed event and vendor name, photo as well as event venue and start and end time. Icon detailed the popup symbol and rendering options like popup width, height and whether or not the popup should be closed on map click.</p>
+<div class="highlight"><pre><span></span>output<span class="o">$</span>map <span class="o">&lt;-</span> renderLeaflet<span class="p">({</span>
+    leaflet<span class="p">()</span> <span class="o">%&gt;%</span>
+      setView<span class="p">(</span>lng <span class="o">=</span> <span class="m">-18.455845</span><span class="p">,</span> lat <span class="o">=</span> <span class="m">-3.26</span><span class="p">,</span> zoom <span class="o">=</span> <span class="m">2</span><span class="p">)</span> <span class="o">%&gt;%</span>
+      addProviderTiles<span class="p">(</span>providers<span class="o">$</span>OpenStreetMap.France<span class="p">,</span> options <span class="o">=</span> providerTileOptions<span class="p">(</span>noWrap <span class="o">=</span> <span class="kc">TRUE</span><span class="p">))</span>
+  <span class="p">})</span>
+
+leafletProxy<span class="p">(</span><span class="s">&quot;map&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  clearMarkers<span class="p">()</span> <span class="o">%&gt;%</span>
+  clearPopups<span class="p">()</span> <span class="o">%&gt;%</span>
+  setView<span class="p">(</span>lng <span class="o">=</span> clng<span class="p">,</span> lat <span class="o">=</span> clat<span class="p">,</span> zoom <span class="o">=</span> <span class="m">10</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  addMarkers<span class="p">(</span>
+    lng <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>group<span class="o">$</span>group_lon<span class="p">)),</span>
+    lat <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>res<span class="o">$</span>results<span class="o">$</span>group<span class="o">$</span>group_lat<span class="p">)),</span>
+    popup <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h4 style=&#39;color:red;&#39;&gt;&quot;</span><span class="p">,</span> res<span class="o">$</span>results<span class="o">$</span>name<span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/h4&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h5&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span>eventsDat<span class="o">$</span>startWeekday<span class="p">,</span> eventsDat<span class="o">$</span>startDateFinal<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;, &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span>eventsDat<span class="o">$</span>timeStartFinal<span class="p">,</span> eventsDat<span class="o">$</span>timeEndFinal<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; - &quot;</span><span class="p">),</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Venue:&quot;</span><span class="p">,</span> res<span class="o">$</span>results<span class="o">$</span>venue<span class="o">$</span>address_1<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;/h5&gt;&quot;</span><span class="p">,</span>
+      <span class="s">&quot;&lt;h6&gt;&quot;</span><span class="p">,</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Event link:&quot;</span><span class="p">,</span> res<span class="o">$</span>results<span class="o">$</span>event_url<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;/h6&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;&lt;img src = &quot;</span><span class="p">,</span> eventsDat<span class="o">$</span>photos<span class="p">,</span> <span class="s">&quot; width = 350&quot;</span><span class="p">,</span> <span class="s">&quot; height = 300&quot;</span><span class="p">,</span> <span class="s">&quot;&gt;&quot;</span><span class="p">),</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="s">&quot;&lt;h6&gt;&quot;</span><span class="p">,</span> res<span class="o">$</span>results<span class="o">$</span>group<span class="o">$</span>name<span class="p">,</span> <span class="s">&quot;&lt;/h6&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      res<span class="o">$</span>results<span class="o">$</span>description
+    <span class="p">),</span>
+    icon <span class="o">=</span> meetupIcon<span class="p">,</span> popupOptions <span class="o">=</span> popupOptions<span class="p">(</span>minWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxHeight <span class="o">=</span> <span class="m">400</span><span class="p">,</span> closeOnClick <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+  <span class="p">)</span> <span class="o">%&gt;%</span>
+  addMarkers<span class="p">(</span>
+    lng <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>resEventB<span class="o">$</span>events<span class="o">$</span>venue<span class="o">$</span>longitude<span class="p">)),</span>
+    lat <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>resEventB<span class="o">$</span>events<span class="o">$</span>venue<span class="o">$</span>latitude<span class="p">)),</span>
+    popup <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h4 style=&#39;color:red;&#39;&gt;&quot;</span><span class="p">,</span> resEventB<span class="o">$</span>events<span class="o">$</span>name<span class="o">$</span>text<span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/h4&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h5&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span>startLocalWeekday<span class="p">,</span> startLocalDateFinal<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;, &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span>startLocalTimeFinal<span class="p">,</span> endLocalTimeFinal<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; - &quot;</span><span class="p">),</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Venue:&quot;</span><span class="p">,</span> resEventB<span class="o">$</span>events<span class="o">$</span>venue<span class="o">$</span>address<span class="o">$</span>localized_address_display<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;/h5&gt;&quot;</span><span class="p">,</span>
+      <span class="s">&quot;&lt;h6&gt;&quot;</span><span class="p">,</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Event link:&quot;</span><span class="p">,</span> resEventB<span class="o">$</span>events<span class="o">$</span><span class="kp">url</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;/h6&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;&lt;img src = &quot;</span><span class="p">,</span> resEventB<span class="o">$</span>events<span class="o">$</span>logo<span class="o">$</span><span class="kp">url</span><span class="p">,</span> <span class="s">&quot;&gt;&quot;</span><span class="p">),</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      resEventB<span class="o">$</span>events<span class="o">$</span>description<span class="o">$</span>text
+    <span class="p">),</span>
+    icon <span class="o">=</span> eventBrightIcon<span class="p">,</span> popupOptions <span class="o">=</span> popupOptions<span class="p">(</span>minWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxHeight <span class="o">=</span> <span class="m">400</span><span class="p">,</span> closeOnClick <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+  <span class="p">)</span> <span class="o">%&gt;%</span>
+  addMarkers<span class="p">(</span>
+    lng <span class="o">=</span> dat<span class="o">$</span>lng<span class="p">,</span> lat <span class="o">=</span> dat<span class="o">$</span>lat<span class="p">,</span> group <span class="o">=</span> <span class="s">&quot;circles&quot;</span><span class="p">,</span>
+    popup <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h4 style=&#39;color:red;&#39;&gt;&quot;</span><span class="p">,</span> dat<span class="o">$</span>name<span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/h4&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h5&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Address: &quot;</span><span class="p">,</span> dat<span class="o">$</span>vicinity<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Price level: &quot;</span><span class="p">,</span> dat<span class="o">$</span>price_level<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Rating: &quot;</span><span class="p">,</span> dat<span class="o">$</span>rating<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span> <span class="s">&quot;&lt;/h5&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span>
+    <span class="p">),</span> icon <span class="o">=</span> googleIcon<span class="p">,</span>
+    popupOptions <span class="o">=</span> popupOptions<span class="p">(</span>minWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxHeight <span class="o">=</span> <span class="m">400</span><span class="p">,</span> closeOnClick <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+  <span class="p">)</span> <span class="o">%&gt;%</span>
+  addMarkers<span class="p">(</span>
+    lng <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>longitudeYelp<span class="p">),</span> lat <span class="o">=</span> <span class="kp">as.numeric</span><span class="p">(</span>latitudeYelp<span class="p">),</span>
+    popup <span class="o">=</span> <span class="kp">paste</span><span class="p">(</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h4 style=&#39;color:red;&#39;&gt;&quot;</span><span class="p">,</span> businessName<span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/h4&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;h5&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Price: &quot;</span><span class="p">,</span> businessPrice<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Rating: &quot;</span><span class="p">,</span> businessRating<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span> <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Restaurant Closing Status: &quot;</span><span class="p">,</span> isClosed<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">),</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span><span class="p">,</span> <span class="kp">paste</span><span class="p">(</span><span class="s">&quot;Venue: &quot;</span><span class="p">,</span> displayAddress<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="p">),</span> <span class="s">&quot;&lt;/h5&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;/br&gt;&quot;</span><span class="p">,</span>
+      <span class="kp">paste0</span><span class="p">(</span><span class="s">&quot;&lt;img src = &quot;</span><span class="p">,</span> imageURL<span class="p">,</span> <span class="s">&quot; width = 350&quot;</span><span class="p">,</span> <span class="s">&quot; height = 300&quot;</span><span class="p">,</span> <span class="s">&quot;&gt;&quot;</span><span class="p">),</span>
+      <span class="s">&quot;&lt;br&gt;&quot;</span>
+    <span class="p">),</span>
+    icon <span class="o">=</span> yelpIcon<span class="p">,</span> popupOptions <span class="o">=</span> popupOptions<span class="p">(</span>minWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxWidth <span class="o">=</span> <span class="m">400</span><span class="p">,</span> maxHeight <span class="o">=</span> <span class="m">400</span><span class="p">,</span> closeOnClick <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+  <span class="p">)</span>
+</pre></div>
+
+
+<p><br></br></p>
+<h3>Code Formatting</h3>
+<p>Leaflet plot was embedded in <em>observe</em> from <em>shiny</em> package, which acts similarly to a reactive expression but whereas a reactive expression returns an output, observer produces a rendered output. Application code was embedded within a progress bar, which was approximately incremented as shown, to display remaining run time.</p>
+<div class="highlight"><pre><span></span>withProgress<span class="p">(</span>message <span class="o">=</span> <span class="s">&quot;Application loading&quot;</span><span class="p">,</span> value <span class="o">=</span> <span class="m">0</span><span class="p">,</span> <span class="p">{</span>
+  <span class="c1">#code</span>
+  incProgress<span class="p">(</span><span class="m">0.3</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Getting data&quot;</span><span class="p">)</span>
+  <span class="c1">#code</span>
+  incProgress<span class="p">(</span><span class="m">0.7</span><span class="p">,</span> detail <span class="o">=</span> <span class="s">&quot;Finishing&quot;</span><span class="p">)</span>
+<span class="p">})</span>
+</pre></div>
+
+
+<p>Events were geocoded based on both user address and click. User click was captured using <em>map_click</em>. Individual latitude and longitude coordinates were accessed from click output, <em>click</em>, using <code>click$lat</code> and <code>click$lng</code>.  </p>
+<div class="highlight"><pre><span></span>mapClick <span class="o">&lt;-</span> eventReactive<span class="p">(</span>input<span class="o">$</span>eventClick<span class="p">,</span> <span class="p">{</span>
+  click <span class="o">&lt;-</span> input<span class="o">$</span>map_click
+  <span class="kr">return</span><span class="p">(</span>click<span class="p">)</span>
+<span class="p">})</span>
+
+click <span class="o">&lt;-</span> mapClick<span class="p">()</span>
+clat <span class="o">&lt;-</span> click<span class="o">$</span>lat
+clng <span class="o">&lt;-</span> click<span class="o">$</span>lng
+</pre></div>
+
+
+<p><br></br></p>
+<h3>Deploying Shiny Application</h3>
+<p>The application was deployed using shinyapps.io. After an online account was created, <em>rsconnect</em> package was used. Before deployment,  <em>setAccountInfo</em> was used to define user credentials, token and secret key using schema shown below. Lastly, <em>deployApp</em> function was used to define path to the application (ui and server files) and to finally deploy the application.</p>
+<div class="highlight"><pre><span></span>rsconnect<span class="o">::</span>setAccountInfo<span class="p">(</span>name<span class="o">=</span><span class="s">&#39;USER&#39;</span><span class="p">,</span>
+              token<span class="o">=</span><span class="s">&#39;TOKEN&#39;</span><span class="p">,</span>
+              secret<span class="o">=</span><span class="s">&#39;&lt;SECRET&gt;&#39;</span><span class="p">)</span>
+deployApp<span class="p">(</span><span class="s">&#39;/PathToApplication&#39;</span><span class="p">)</span>
+</pre></div>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 3 of the Shiny Application series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/flights-delay-shiny-application.html">Flights Delay Shiny Application</a></li>
+           <li><a href="/function-name-conflicts-shiny-application.html">Function Name Conflicts Shiny Application</a></li>
+       </ul>
+       <h5>Next articles</h5>
+       <ul>
+           <li><a href="/twitter-analytics-shiny-application.html">Twitter Analytics Shiny Application</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

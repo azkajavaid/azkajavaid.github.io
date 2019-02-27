@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Principle Component Analysis (PCA) - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/principle-component-analysis-pca.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="Following post shows an overview of Principle Components Analysis (PCA) using the Chronic Kidney Disease dataset, from UCI Machine Learning Repository. PCA is a dimensionality reduction technique that converts correlated predictors into a set of uncorrelated predictors called principle components using orthogonal transformations. Chronic Kidney Disease Data, collected from a …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Principle Component Analysis (PCA)"/>
+        <meta property="og:url" content="/principle-component-analysis-pca.html"/>
+        <meta property="og:description" content="Following post shows an overview of Principle Components Analysis (PCA) using the Chronic Kidney Disease dataset, from UCI Machine Learning Repository. PCA is a dimensionality reduction technique that converts correlated predictors into a set of uncorrelated predictors called principle components using orthogonal transformations. Chronic Kidney Disease Data, collected from a …"/>
+        <meta property="article:published_time" content="2018-03-18" />
+            <meta property="article:section" content="Machine Learning" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li >
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li >
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/principle-component-analysis-pca.html"
+                       rel="bookmark"
+                       title="Permalink to Principle Component Analysis (PCA)">
+                        Principle Component Analysis (PCA)
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-03-18T00:00:00-04:00"> Sun 18 March 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/machine-learning.html">Machine Learning</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <h5>Following post shows an overview of Principle Components Analysis (PCA) using the Chronic Kidney Disease dataset, from <a href="https://archive.ics.uci.edu/ml/datasets/Chronic_Kidney_Disease#">UCI Machine Learning Repository</a>. PCA is a dimensionality reduction technique that converts correlated predictors into a set of uncorrelated predictors called principle components using orthogonal transformations.</h5>
+<h5>Chronic Kidney Disease Data, collected from a hospital for nearly 2 months, contains features that can be used to predict chronic kidney disease incidence. Collected attributes include age, blood pressure, specific gravity, albumin, sugar, red blood cells, pus cell, pus cell clumps, bacteria, blood glucose random, blood urea, serum creatinine, sodium, potassium, hemoglobin, packed cell volume, white blood cell count, red blood cell count, hypertension, diabetes mellitus, coronary artery disease, appetite, pedal edema and anemia. Features are used to predict coronary kidney disease incidence as defined by the <em>class</em> predictor. For further details about feature definition and data collection, see <a href="https://archive.ics.uci.edu/ml/citation_policy.html">citation</a>.</h5>
+<p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>stats<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>rpart<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Read the Chronic Kidney Disease dataset (archived) from <em>UCI Machine Learning Repository</em></h3>
+<div class="highlight"><pre><span></span>ckd_data <span class="o">&lt;-</span> read.csv<span class="p">(</span><span class="s">&quot;https://raw.githubusercontent.com/ajav17/Chronic-Kidney-Disease-UCI-Dataset/master/chronic_kidney_disease_dataset.csv&quot;</span><span class="p">)</span>
+ckd_data <span class="o">&lt;-</span> ckd_data<span class="p">[</span> <span class="p">,</span><span class="o">!</span><span class="p">(</span><span class="kp">colnames</span><span class="p">(</span>ckd_data<span class="p">)</span> <span class="o">%in%</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;rbc&quot;</span><span class="p">,</span> <span class="s">&quot;pc&quot;</span><span class="p">))]</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Replace missing values with NA for later imputation</h3>
+<div class="highlight"><pre><span></span>ckd_data<span class="p">[</span>ckd_data <span class="o">==</span> <span class="s">&quot;?&quot;</span><span class="p">]</span> <span class="o">&lt;-</span> <span class="kc">NA</span>
+ckd_data <span class="o">&lt;-</span> base<span class="o">::</span><span class="kp">droplevels</span><span class="p">(</span>ckd_data<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Convert variable types</h3>
+<div class="highlight"><pre><span></span>ckd_data<span class="o">$</span>age <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>age<span class="p">))</span>
+ckd_data<span class="o">$</span>bp <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>bp<span class="p">))</span>
+ckd_data<span class="o">$</span>sg <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>sg<span class="p">))</span>
+ckd_data<span class="o">$</span>al <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>al<span class="p">))</span>
+ckd_data<span class="o">$</span>su <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>su<span class="p">))</span>
+ckd_data<span class="o">$</span>bgr <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>bgr<span class="p">))</span>
+ckd_data<span class="o">$</span>bu <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>bu<span class="p">))</span>
+ckd_data<span class="o">$</span>sc <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>sc<span class="p">))</span>
+ckd_data<span class="o">$</span>sod <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>sod<span class="p">))</span>
+ckd_data<span class="o">$</span>pot <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>pot<span class="p">))</span>
+ckd_data<span class="o">$</span>hemo <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>hemo<span class="p">))</span>
+ckd_data<span class="o">$</span>pcv <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>pcv<span class="p">))</span>
+ckd_data<span class="o">$</span>wbcc <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>wbcc<span class="p">))</span>
+ckd_data<span class="o">$</span>rbcc <span class="o">&lt;-</span> <span class="kp">as.numeric</span><span class="p">(</span><span class="kp">as.character</span><span class="p">(</span>ckd_data<span class="o">$</span>rbcc<span class="p">))</span>
+ckd_data<span class="o">$</span>pcc <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>pcc<span class="p">)</span>
+ckd_data<span class="o">$</span>ba <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>ba<span class="p">)</span>
+ckd_data<span class="o">$</span>htn <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>htn<span class="p">)</span>
+ckd_data<span class="o">$</span>dm <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>dm<span class="p">)</span>
+ckd_data<span class="o">$</span>cad <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>cad<span class="p">)</span>
+ckd_data<span class="o">$</span>appet <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>appet<span class="p">)</span>
+ckd_data<span class="o">$</span>pe <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>pe<span class="p">)</span>
+ckd_data<span class="o">$</span>ane <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span>ane<span class="p">)</span>
+ckd_data<span class="o">$</span>class <span class="o">&lt;-</span> <span class="kp">as.factor</span><span class="p">(</span>ckd_data<span class="o">$</span><span class="kp">class</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Impute missing values with mean</h3>
+<div class="highlight"><pre><span></span>ckd_copy <span class="o">&lt;-</span> ckd_data
+imputeMean <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kr">if</span> <span class="p">(</span><span class="kp">class</span><span class="p">(</span>x<span class="p">)</span> <span class="o">==</span> <span class="s">&quot;numeric&quot;</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kp">replace</span><span class="p">(</span>x<span class="p">,</span> <span class="kp">is.na</span><span class="p">(</span>x<span class="p">),</span> <span class="kp">mean</span><span class="p">(</span>x<span class="p">,</span> na.rm <span class="o">=</span> <span class="kc">TRUE</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+ckd_data <span class="o">&lt;-</span> <span class="kp">lapply</span><span class="p">(</span>ckd_data<span class="p">,</span> imputeMean<span class="p">)</span>
+ckd <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span><span class="kp">t</span><span class="p">(</span><span class="kp">do.call</span><span class="p">(</span><span class="kp">rbind</span><span class="p">,</span> ckd_data<span class="p">)))</span>
+
+ckd <span class="o">&lt;-</span> <span class="kp">cbind</span><span class="p">(</span>ckd<span class="p">,</span> ckd_copy<span class="o">$</span>pcc<span class="p">,</span> ckd_copy<span class="o">$</span>ba<span class="p">,</span> ckd_copy<span class="o">$</span>htn<span class="p">,</span>
+           ckd_copy<span class="o">$</span>dm<span class="p">,</span> ckd_copy<span class="o">$</span>cad<span class="p">,</span> ckd_copy<span class="o">$</span>appet<span class="p">,</span> ckd_copy<span class="o">$</span>pe<span class="p">,</span> ckd_copy<span class="o">$</span>ane<span class="p">,</span> ckd_copy<span class="o">$</span><span class="kp">class</span><span class="p">)</span>
+<span class="kp">colnames</span><span class="p">(</span>ckd<span class="p">)</span> <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="s">&quot;bp&quot;</span><span class="p">,</span> <span class="s">&quot;sg&quot;</span><span class="p">,</span> <span class="s">&quot;al&quot;</span><span class="p">,</span> <span class="s">&quot;su&quot;</span><span class="p">,</span> <span class="s">&quot;bgr&quot;</span><span class="p">,</span> <span class="s">&quot;bu&quot;</span><span class="p">,</span> <span class="s">&quot;sc&quot;</span><span class="p">,</span> <span class="s">&quot;sod&quot;</span><span class="p">,</span> <span class="s">&quot;pot&quot;</span><span class="p">,</span> <span class="s">&quot;hemo&quot;</span><span class="p">,</span> <span class="s">&quot;pcv&quot;</span><span class="p">,</span> <span class="s">&quot;wbcc&quot;</span><span class="p">,</span> <span class="s">&quot;rbcc&quot;</span><span class="p">,</span>
+                <span class="s">&quot;pcc&quot;</span><span class="p">,</span> <span class="s">&quot;ba&quot;</span><span class="p">,</span> <span class="s">&quot;htn&quot;</span><span class="p">,</span> <span class="s">&quot;dm&quot;</span><span class="p">,</span> <span class="s">&quot;cad&quot;</span><span class="p">,</span> <span class="s">&quot;appet&quot;</span><span class="p">,</span> <span class="s">&quot;pe&quot;</span><span class="p">,</span> <span class="s">&quot;ane&quot;</span><span class="p">,</span> <span class="s">&quot;class&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Omit any remaining values</h3>
+<div class="highlight"><pre><span></span>ckd_data <span class="o">&lt;-</span> stats<span class="o">::</span>na.omit<span class="p">(</span>ckd<span class="p">)</span>
+<span class="kp">nrow</span><span class="p">(</span>ckd_data<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 333
+</pre></div>
+
+
+<p><br></p>
+<h3>PCA</h3>
+<h3>Selecting numeric predictors for PCA</h3>
+<div class="highlight"><pre><span></span><span class="kt">numeric</span> <span class="o">&lt;-</span> <span class="kp">sapply</span><span class="p">(</span>ckd_data<span class="p">,</span> <span class="kp">is.numeric</span><span class="p">)</span>
+ckd_data_num <span class="o">&lt;-</span> ckd_data<span class="p">[,</span> <span class="kt">numeric</span><span class="p">]</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Partitioning train and test sets</h3>
+<div class="highlight"><pre><span></span>n <span class="o">=</span> <span class="kp">nrow</span><span class="p">(</span>ckd_data<span class="p">)</span>
+index <span class="o">=</span> base<span class="o">::</span><span class="kp">sample</span><span class="p">(</span><span class="m">1</span><span class="o">:</span>n<span class="p">,</span> size <span class="o">=</span> <span class="kp">round</span><span class="p">(</span><span class="m">0.75</span><span class="o">*</span>n<span class="p">),</span> replace <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
+train2 <span class="o">=</span> ckd_data<span class="p">[</span>index <span class="p">,]</span>
+test2 <span class="o">=</span> ckd_data<span class="p">[</span><span class="o">-</span>index <span class="p">,]</span>
+
+num_index_test <span class="o">&lt;-</span> <span class="kp">sapply</span><span class="p">(</span>test2<span class="p">,</span> <span class="kp">is.numeric</span><span class="p">)</span>
+num_index_train <span class="o">&lt;-</span> <span class="kp">sapply</span><span class="p">(</span>train2<span class="p">,</span> <span class="kp">is.numeric</span><span class="p">)</span>
+train2_num <span class="o">&lt;-</span> train2<span class="p">[,</span> num_index_train<span class="p">]</span>
+test2_num <span class="o">&lt;-</span> test2<span class="p">[,</span> num_index_test<span class="p">]</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Applying principle components</h3>
+<div class="highlight"><pre><span></span>principle_comp <span class="o">&lt;-</span> prcomp<span class="p">(</span>train2_num<span class="p">,</span> center <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> scale. <span class="o">=</span> <span class="bp">T</span><span class="p">)</span>
+<span class="kp">dim</span><span class="p">(</span>principle_comp<span class="o">$</span>x<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 250  14
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kp">print</span><span class="p">(</span>principle_comp<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## Standard deviations (1, .., p=14):
+##  [1] 2.1356539 1.3095935 1.1427020 1.0895520 1.0118050 0.9217633 0.9126997
+##  [8] 0.7884078 0.7144548 0.6482579 0.5699756 0.5500808 0.4665634 0.3566861
+## 
+## Rotation (n x k) = (14 x 14):
+##              PC1         PC2         PC3         PC4          PC5
+## age   0.18568534 -0.17753082 -0.01522342  0.07163808 -0.259122149
+## bp    0.14224600 -0.06096325  0.01023196 -0.21816811 -0.753714791
+## sg   -0.28408381  0.19397838 -0.08372604 -0.09834507 -0.079331169
+## al    0.32074464 -0.09668204  0.11527488 -0.02914664  0.304899748
+## su    0.18225833 -0.47366373 -0.45419059  0.02005034 -0.030996731
+## bgr   0.20315545 -0.48387235 -0.31621651  0.21516216 -0.003578622
+## bu    0.32176736  0.27937508 -0.15752930 -0.22991428  0.190878611
+## sc    0.24473474  0.40660766 -0.35624425  0.27295528  0.041297545
+## sod  -0.22178142 -0.32830865  0.18627870 -0.58252764  0.070832354
+## pot   0.12879353  0.07563276 -0.42480054 -0.61217479  0.241389043
+## hemo -0.39747992 -0.04151640 -0.28043678  0.08301244  0.027836462
+## pcv  -0.39742088 -0.03274801 -0.26889647  0.09283823  0.067927108
+## wbcc  0.05639762 -0.30642626  0.32113766  0.16222212  0.389218295
+## rbcc -0.37268972 -0.07563917 -0.22830468  0.08224969  0.078949133
+##              PC6          PC7          PC8         PC9         PC10
+## age   0.38107638 -0.836458433  0.034051016 -0.10113476  0.030437335
+## bp    0.28768385  0.416439791 -0.070003826 -0.26565074  0.044451928
+## sg    0.28809467  0.049686527  0.823316652  0.28234625  0.105209625
+## al   -0.05405720  0.083316805  0.377341403 -0.70660250  0.312758271
+## su    0.01215736  0.167991350  0.107505491  0.11614701 -0.219389115
+## bgr  -0.23253742  0.033653576  0.186836060  0.16397884  0.059675977
+## bu    0.07736250 -0.043518758  0.160869073 -0.14260331 -0.606381283
+## sc    0.26438650  0.091288016 -0.128929647 -0.02475725 -0.157213404
+## sod  -0.02494634 -0.085140048  0.005944041 -0.06364227 -0.380939539
+## pot   0.16013606 -0.037867603 -0.236084281  0.16044111  0.474656659
+## hemo  0.12030748 -0.048457282 -0.086920409 -0.22563429  0.118676716
+## pcv   0.07908303 -0.005326901 -0.060800312 -0.31590475  0.023707811
+## wbcc  0.70375227  0.256511416 -0.123270476  0.15166872 -0.008497769
+## rbcc  0.11717638  0.032654766 -0.050176955 -0.27452758 -0.242840195
+##              PC11        PC12        PC13          PC14
+## age   0.002140315  0.05017720 -0.01258517  0.0402359275
+## bp   -0.140660707 -0.07834737 -0.02658567  0.0002937661
+## sg   -0.000282000  0.02889846  0.05813752  0.0192951310
+## al    0.089281175  0.10591501  0.10242703 -0.0404737905
+## su    0.579438952  0.23498919 -0.20477001  0.0180125332
+## bgr  -0.562197308 -0.29468777  0.23353223 -0.0169339759
+## bu   -0.201342020 -0.31309454 -0.37423449 -0.0624076547
+## sc    0.115437689  0.05904818  0.65927189 -0.0041900558
+## sod   0.083534380 -0.06632398  0.54310495 -0.0236515783
+## pot  -0.133772009  0.08409883 -0.05540173  0.0481587674
+## hemo  0.145279970 -0.37742270 -0.04932235 -0.7061277301
+## pcv   0.088802381 -0.38335927 -0.04611510  0.6986644563
+## wbcc -0.079468220 -0.11017304 -0.06431116  0.0077562753
+## rbcc -0.454289249  0.65014871 -0.08588973 -0.0464742259
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kp">summary</span><span class="p">(</span>principle_comp<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## Importance of components:
+##                           PC1    PC2     PC3     PC4     PC5     PC6
+## Standard deviation     2.1357 1.3096 1.14270 1.08955 1.01180 0.92176
+## Proportion of Variance 0.3258 0.1225 0.09327 0.08479 0.07312 0.06069
+## Cumulative Proportion  0.3258 0.4483 0.54156 0.62635 0.69948 0.76017
+##                           PC7    PC8     PC9    PC10    PC11    PC12
+## Standard deviation     0.9127 0.7884 0.71445 0.64826 0.56998 0.55008
+## Proportion of Variance 0.0595 0.0444 0.03646 0.03002 0.02321 0.02161
+## Cumulative Proportion  0.8197 0.8641 0.90053 0.93055 0.95375 0.97536
+##                           PC13    PC14
+## Standard deviation     0.46656 0.35669
+## Proportion of Variance 0.01555 0.00909
+## Cumulative Proportion  0.99091 1.00000
+</pre></div>
+
+
+<p><br></p>
+<h3>Biplot</h3>
+<div class="highlight"><pre><span></span>biplot<span class="p">(</span>principle_comp<span class="p">,</span> scale <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;image&quot;" src="/figures/PCA/unnamed-chunk-10-1.png">
+</center>
+<br></p>
+<h3>Scree plot</h3>
+<div class="highlight"><pre><span></span>plot<span class="p">(</span>principle_comp<span class="p">,</span> type <span class="o">=</span> <span class="s">&quot;l&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;image&quot;" src="/figures/PCA/unnamed-chunk-11-1.png">
+</center>
+<br></p>
+<h3>Training data with appropriate components</h3>
+<div class="highlight"><pre><span></span>train_prin <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>train2<span class="o">$</span><span class="kp">class</span><span class="p">,</span> principle_comp<span class="o">$</span>x<span class="p">)</span>
+train_prin <span class="o">&lt;-</span> train_prin<span class="p">[,</span> <span class="m">1</span><span class="o">:</span><span class="m">10</span><span class="p">]</span> <span class="c1"># select 9 components</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Model decision tree</h3>
+<div class="highlight"><pre><span></span>tree_prin <span class="o">&lt;-</span> rpart<span class="p">(</span>train2.class <span class="o">~</span> <span class="m">.</span><span class="p">,</span> data <span class="o">=</span> train_prin<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Construct test data from PCA</h3>
+<div class="highlight"><pre><span></span><span class="c1"># Converting test to PCA</span>
+test_prin <span class="o">&lt;-</span> <span class="kp">as.data.frame</span><span class="p">(</span>predict<span class="p">(</span>principle_comp<span class="p">,</span> test2_num<span class="p">))</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Predict decision tree on test data</h3>
+<div class="highlight"><pre><span></span><span class="c1"># Select 9 components and predict on test set</span>
+test_prin <span class="o">&lt;-</span> test_prin<span class="p">[,</span> <span class="m">1</span><span class="o">:</span><span class="m">9</span><span class="p">]</span>
+tree_predict <span class="o">&lt;-</span> predict<span class="p">(</span>tree_prin<span class="p">,</span> test_prin<span class="p">,</span> type <span class="o">=</span> <span class="s">&quot;class&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Calculating accuracy</h3>
+<div class="highlight"><pre><span></span>tab <span class="o">&lt;-</span> base<span class="o">::</span><span class="kp">table</span><span class="p">(</span>tree_predict<span class="p">,</span> test2<span class="o">$</span><span class="kp">class</span><span class="p">)</span>
+<span class="kp">round</span><span class="p">(</span><span class="kp">sum</span><span class="p">(</span><span class="kp">diag</span><span class="p">(</span>tab<span class="p">))</span><span class="o">/</span><span class="kp">sum</span><span class="p">(</span>tab<span class="p">),</span> <span class="m">3</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## [1] 0.952
+</pre></div>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 8 of the Machine Learning series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/linear-regression.html">Linear Regression</a></li>
+           <li><a href="/logistic-regression.html">Logistic Regression</a></li>
+           <li><a href="/partition-data-frame-in-training-and-test-data.html">Partition Data Frame in Training and Test Data</a></li>
+           <li><a href="/stepwise-regression-forward-backward-both.html">Stepwise Regression (Forward, Backward, Both)</a></li>
+           <li><a href="/decision-tree-classification.html">Decision Tree (Classification)</a></li>
+           <li><a href="/k-nearest-neighbor-classification.html">K-Nearest Neighbor (Classification)</a></li>
+           <li><a href="/naive-bayes-classification.html">Naive Bayes (Classification)</a></li>
+       </ul>
+       <h5>Next articles</h5>
+       <ul>
+           <li><a href="/random-forest-classification.html">Random Forest (Classification)</a></li>
+           <li><a href="/support-vector-machines-svm.html">Support Vector Machines (SVM)</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>

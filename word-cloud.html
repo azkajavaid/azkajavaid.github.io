@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Word Cloud - Data Science with R</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/word-cloud.html">
+
+        <meta name="author" content="Azka Javaid" />
+        <meta name="description" content="For this word cloud analysis, Great Expectations by Charles Dickens was studied. Great Expectations charts Pip, an orphan&#39;s, personal development, exploring universal themes like guilt, persistence and social advancement and historical constructs like wealth, poverty, morality, good versus evil, and Victorian social structures. This post will provide a brief bigram …" />
+
+        <meta property="og:site_name" content="Data Science with R" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Word Cloud"/>
+        <meta property="og:url" content="/word-cloud.html"/>
+        <meta property="og:description" content="For this word cloud analysis, Great Expectations by Charles Dickens was studied. Great Expectations charts Pip, an orphan&#39;s, personal development, exploring universal themes like guilt, persistence and social advancement and historical constructs like wealth, poverty, morality, good versus evil, and Victorian social structures. This post will provide a brief bigram …"/>
+        <meta property="article:published_time" content="2018-03-18" />
+            <meta property="article:section" content="Text Analysis" />
+            <meta property="article:author" content="Azka Javaid" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/colorful.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Data Science with R ATOM Feed"/>
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Data Science with R            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li >
+                            <a href="/category/about.html">About</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-modeling.html">Data modeling</a>
+                        </li>
+                        <li >
+                            <a href="/category/data-wrangling.html">Data wrangling</a>
+                        </li>
+                        <li >
+                            <a href="/category/machine-learning.html">Machine learning</a>
+                        </li>
+                        <li >
+                            <a href="/category/shiny-app.html">Shiny app</a>
+                        </li>
+                        <li >
+                            <a href="/category/statistics.html">Statistics</a>
+                        </li>
+                        <li class="active">
+                            <a href="/category/text-analysis.html">Text analysis</a>
+                        </li>
+                        <li >
+                            <a href="/category/visualization.html">Visualization</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/word-cloud.html"
+                       rel="bookmark"
+                       title="Permalink to Word Cloud">
+                        Word Cloud
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2018-03-18T00:00:00-04:00"> Sun 18 March 2018</time>
+    </span>
+
+
+
+        <span class="label label-default">Category</span>
+        <a href="/category/text-analysis.html">Text Analysis</a>
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p><br></p>
+<h5>For this word cloud analysis, <em>Great Expectations</em> by Charles Dickens was studied. <em>Great Expectations</em> charts Pip, an orphan's, personal development, exploring universal themes like guilt, persistence and social advancement and historical constructs like wealth, poverty, morality, good versus evil, and Victorian social structures.</h5>
+<h5>This post will provide a brief bigram analysis of his work. All other works from The Project Gutenberg can be retrieved by <code>View(gutenberg_works())</code>.</h5>
+<p><br></p>
+<h3>Import packages</h3>
+<div class="highlight"><pre><span></span><span class="kn">library</span><span class="p">(</span>gutenbergr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>wordcloud<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>tidytext<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>reshape2<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>tidyr<span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Retrieve text from Project Gutenberg</h3>
+<div class="highlight"><pre><span></span>gutenberg_works<span class="p">(</span>author <span class="o">==</span> <span class="s">&quot;Dickens, Charles&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> <span class="kp">head</span><span class="p">(</span><span class="m">10</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 10 x 8
+##    gutenberg_id title    author gutenberg_autho… language gutenberg_books…
+##           &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;           
+##  1           46 A Chris… Dicke…               37 en       Christmas/Child…
+##  2           98 A Tale … Dicke…               37 en       Historical Fict…
+##  3          564 The Mys… Dicke…               37 en       Mystery Fiction
+##  4          580 The Pic… Dicke…               37 en       Best Books Ever…
+##  5          588 Master … Dicke…               37 en       &lt;NA&gt;            
+##  6          644 The Hau… Dicke…               37 en       Christmas       
+##  7          650 Picture… Dicke…               37 en       &lt;NA&gt;            
+##  8          653 &quot;The Ch… Dicke…               37 en       &lt;NA&gt;            
+##  9          675 America… Dicke…               37 en       &lt;NA&gt;            
+## 10          678 The Cri… Dicke…               37 en       Children&#39;s Lite…
+## # ... with 2 more variables: rights &lt;chr&gt;, has_text &lt;lgl&gt;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>gutenberg_works<span class="p">(</span>title <span class="o">==</span> <span class="s">&quot;Great Expectations&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 1 x 8
+##   gutenberg_id title   author   gutenberg_autho… language gutenberg_books…
+##          &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;               &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;           
+## 1         1400 Great … Dickens…               37 en       Best Books Ever…
+## # ... with 2 more variables: rights &lt;chr&gt;, has_text &lt;lgl&gt;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>great_expectations <span class="o">&lt;-</span> gutenberg_download<span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="m">1400</span><span class="p">),</span> meta_fields <span class="o">=</span> <span class="s">&quot;title&quot;</span><span class="p">)</span> <span class="c1"># passing in gutenberg_id</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Tokenize text</h3>
+<div class="highlight"><pre><span></span>tokenize <span class="o">&lt;-</span> great_expectations <span class="o">%&gt;%</span> unnest_tokens<span class="p">(</span>word<span class="p">,</span> text<span class="p">)</span>
+<span class="kp">head</span><span class="p">(</span>tokenize<span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## # A tibble: 6 x 3
+##   gutenberg_id title              word        
+##          &lt;int&gt; &lt;chr&gt;              &lt;chr&gt;       
+## 1         1400 Great Expectations great       
+## 2         1400 Great Expectations expectations
+## 3         1400 Great Expectations 1867        
+## 4         1400 Great Expectations edition     
+## 5         1400 Great Expectations by          
+## 6         1400 Great Expectations charles
+</pre></div>
+
+
+<p><br></p>
+<h3>Remove stop words</h3>
+<div class="highlight"><pre><span></span>tokenize_stop <span class="o">&lt;-</span> tokenize <span class="o">%&gt;%</span>
+  anti_join<span class="p">(</span>stop_words<span class="p">,</span> by <span class="o">=</span> <span class="s">&quot;word&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  dplyr<span class="o">::</span>count<span class="p">(</span>title<span class="p">,</span> word<span class="p">,</span> sort <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Plot word cloud</h3>
+<div class="highlight"><pre><span></span><span class="kp">set.seed</span><span class="p">(</span><span class="m">90</span><span class="p">)</span>
+wordcloud<span class="p">(</span>tokenize_stop<span class="o">$</span>word<span class="p">,</span> tokenize_stop<span class="o">$</span>n<span class="p">,</span>
+          rot.per <span class="o">=</span> <span class="m">0</span><span class="p">,</span> max.words <span class="o">=</span> <span class="m">150</span><span class="p">,</span> scale <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="m">2</span><span class="p">),</span> color <span class="o">=</span> <span class="s">&quot;#0072B2&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;image&quot;" src="/figures/WordCloud-2/unnamed-chunk-5-1.png">
+</center>
+<br></p>
+<h3>Sentiment word cloud</h3>
+<div class="highlight"><pre><span></span>tokenize <span class="o">%&gt;%</span>
+  dplyr<span class="o">::</span>inner_join<span class="p">(</span>get_sentiments<span class="p">(</span><span class="s">&quot;bing&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
+  dplyr<span class="o">::</span>count<span class="p">(</span>word<span class="p">,</span> sentiment<span class="p">,</span> sort <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  acast<span class="p">(</span>word <span class="o">~</span> sentiment<span class="p">,</span> value.var <span class="o">=</span> <span class="s">&quot;n&quot;</span><span class="p">,</span> fill <span class="o">=</span> <span class="m">0</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  comparison.cloud<span class="p">(</span>colors <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="s">&quot;#D55E00&quot;</span><span class="p">,</span> <span class="s">&quot;#009E73&quot;</span><span class="p">),</span>
+                 scale <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="m">2</span><span class="p">),</span> rot.per <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+</pre></div>
+
+
+<p><center>
+<img alt="&quot;image&quot;" src="/figures/WordCloud-2/unnamed-chunk-6-1.png">
+</center></p>
+            </div>
+            <!-- /.entry-content -->
+<section class="well" id="related-posts">
+    <h4>Part 7 of the Text Analysis series</h4>
+       <h5>Previous articles</h5>
+       <ul>
+           <li><a href="/convert-string-to-upper-and-lower-case.html">Convert String to Upper and Lower Case</a></li>
+           <li><a href="/split-by-characterseparator.html">Split by Character/Separator</a></li>
+           <li><a href="/substitute-a-pattern-in-string.html">Substitute a Pattern in String</a></li>
+           <li><a href="/tokenize-string.html">Tokenize String</a></li>
+           <li><a href="/bigram-analysis.html">Bigram Analysis</a></li>
+           <li><a href="/topic-modeling-latent-dirichlet-modeling-using-project-gutenberg.html">Topic Modeling (Latent Dirichlet Modeling) using Project Gutenberg</a></li>
+       </ul>
+</section>
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="well well-sm">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://github.com/azkajavaid"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+    <li class="list-group-item"><a href="https://twitter.com/azkajavaid17"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+    <li class="list-group-item"><a href="https://www.linkedin.com/in/azka-javaid17/"><i class="fa fa-linkedin-square fa-lg"></i> linkedin</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Categories -->
+<li class="list-group-item">
+  <h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Categories</span></h4>
+  <ul class="list-group" id="categories">
+    <li class="list-group-item">
+      <a href="/category/about.html"><i class="fa fa-folder-open fa-lg"></i>About</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-modeling.html"><i class="fa fa-folder-open fa-lg"></i>Data Modeling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/data-wrangling.html"><i class="fa fa-folder-open fa-lg"></i>Data Wrangling</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/machine-learning.html"><i class="fa fa-folder-open fa-lg"></i>Machine Learning</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/shiny-app.html"><i class="fa fa-folder-open fa-lg"></i>Shiny App</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/statistics.html"><i class="fa fa-folder-open fa-lg"></i>Statistics</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/text-analysis.html"><i class="fa fa-folder-open fa-lg"></i>Text Analysis</a>
+    </li>
+    <li class="list-group-item">
+      <a href="/category/visualization.html"><i class="fa fa-folder-open fa-lg"></i>Visualization</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Categories -->
+
+<!-- Sidebar/Github -->
+<li class="list-group-item">
+  <h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+  <div id="gh_repos">
+    <p class="list-group-item">Status updating...</p>
+  </div>
+</li>
+<!-- End Sidebar/Github -->
+
+<!-- Sidebar/Twitter Timeline -->
+<li class="list-group-item">
+  <h4><i class="fa fa-twitter fa-lg"></i><span class="icon-label">Latest Tweets</span></h4>
+  <div id="twitter_timeline">
+    <a class="twitter-timeline" data-width="250" data-height="300" data-dnt="true" data-theme="light" href="https://twitter.com/azkajavaid17">Tweets by azkajavaid17</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+</li>
+<!-- End Sidebar/Twitter Timeline -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2018 Azka Javaid
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>                <p><small>  <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<!-- GitHub JS Code -->
+<script type="text/javascript">
+$(document).ready(function () {
+  if (!window.jXHR) {
+    var jxhr = document.createElement('script');
+    jxhr.type = 'text/javascript';
+    jxhr.src = '/theme/js/jXHR.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(jxhr, s);
+  }
+
+  github.showRepos({
+    user: 'azkajavaid',
+    count: 5,
+    skip_forks: false,
+    target: '#gh_repos'
+  });
+});
+</script>
+<script src="/theme/js/github.js" type="text/javascript"></script>
+<!-- End GitHub JS Code -->
+
+
+</body>
+</html>
